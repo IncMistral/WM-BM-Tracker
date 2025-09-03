@@ -188,7 +188,7 @@ input:focus, select:focus {
   z-index: 2000;
 }
 
-.modalContent {
+.modal-Content {
   background: var(--bg-elev);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-2);
@@ -201,14 +201,14 @@ input:focus, select:focus {
   animation: fadeInScale .25s ease;
 }
 
-.modalContent h3 {
+.modal-Content h3 {
   margin: 0 0 1rem;
   font-size: var(--fs-20);
   font-weight: 700;
   color: var(--text);
 }
 
-.modalContent h4 {
+.modal-Content h4 {
   margin: 1rem 0 0.5rem;
   font-size: var(--fs-16);
   font-weight: 600;
@@ -216,8 +216,8 @@ input:focus, select:focus {
 }
 
 /* Modal action buttons */
-.modalContent .modal-buttons,
-.modalContent > div {
+.modal-Content .modal-buttons,
+.modal-Content > div {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -225,7 +225,7 @@ input:focus, select:focus {
   margin-top: 1rem;
 }
 
-.modalContent button {
+.modal-Content button {
   flex: 1;
   min-width: 7rem;
   padding: 0.6rem 1rem;
@@ -240,35 +240,35 @@ input:focus, select:focus {
   cursor: pointer;
 }
 
-.modalContent button:hover {
+.modal-Content button:hover {
   background: var(--accent-600);
 }
 
-.modalContent button:active {
+.modal-Content button:active {
   background: var(--accent-700);
   transform: scale(0.97);
 }
 
-.modalContent button:focus-visible {
+.modal-Content button:focus-visible {
   outline: 2px solid rgba(0,172,193,.35);
   outline-offset: 2px;
 }
 
-.modalContent button[disabled] {
+.modal-Content button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
   box-shadow: none;
 }
 
 /* Special styles for destructive actions */
-.modalContent button#btnGroupDelete,
-.modalContent button#btnProjectDelete,
-.modalContent button#btnTeamDelete {
+.modal-Content button#btnGroupDelete,
+.modal-Content button#btnProjectDelete,
+.modal-Content button#btnTeamDelete {
   background: var(--danger);
 }
-.modalContent button#btnGroupDelete:hover,
-.modalContent button#btnProjectDelete:hover,
-.modalContent button#btnTeamDelete:hover {
+.modal-Content button#btnGroupDelete:hover,
+.modal-Content button#btnProjectDelete:hover,
+.modal-Content button#btnTeamDelete:hover {
   background: #c0392b;
 }
 
