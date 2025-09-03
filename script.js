@@ -1135,4 +1135,15 @@ async function saveToServer() {
   (function init(){
     wireEvents();
  loadFromServer();
+ 
+   // Auto-save + refresh every 5 minutes
+  setInterval(async () => {
+    try {
+      await saveToServer();   // push to server only
+      render();               // refresh UI
+      console.log("[tracker] Auto-saved and refreshed");
+    } catch (e) {
+      console.warn("[tracker] Auto-save failed:", e);
+    }
+  }, 300000); // 5 minutes
   })();
