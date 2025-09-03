@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BM Project Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="topBar">
+    <img src="./Mistral_Logo.jpg" alt="Mistral Inc. logo" class="logo" />
+    <button id="btnNewGroup" aria-label="+ New Group">+ New Group</button>
+    <button id="btnSave" aria-label="Save to file and local storage">Save</button>
+    <input type="file" id="jsonFileInput" aria-label="Load from JSON file" style="display:none;" />
+    <button id="btnLoad" aria-label="Load from file" aria-controls="jsonFileInput">Load</button>
+  </div>
+
+  <div id="trackerWrapper" aria-live="polite" role="region" aria-label="Project timelines"></div>
+
+  <!-- Group Modal -->
+  <div id="groupModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="groupModalTitle">
+    <div class="modalContent">
+      <h3 id="groupModalTitle">EDIT GROUP</h3>
+      <input type="text" id="groupNameInput" placeholder="Group name" />
+      <div class="modal-buttons">
+        <button id="btnGroupEditTeam" aria-controls="teamModal">Edit Team</button>
+        <button id="btnGroupNewProject" aria-controls="projectModal">New Project</button>
+      </div>
+      <h4>GROUP PROJECTS</h4>
+      <div id="groupProjectList"></div>
+      <div class="modal-buttons">
+        <button id="btnGroupSelectAll">Select All</button>
+        <button id="btnGroupClearSelection">Clear</button>
+        <button id="btnGroupExport">Export Selected (XLSX)</button>
+      </div>
+      <div class="modal-buttons">
+        <button id="btnGroupSave">Save</button>
+        <button id="btnGroupDelete">Delete Group</button>
+        <button id="btnGroupClose">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Modal -->
+  <div id="projectModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+    <div class="modalContent">
+      <h3 id="projectModalTitle">Edit Project</h3>
+      <input type="text" id="projectTitleInput" placeholder="Project Title" />
+      <input type="date" id="startDateInput" placeholder="Project Start Date" />
+      <input type="date" id="completionDateInput" placeholder="Project Completion Date" />
+      <h4>MILESTONES</h4>
+      <input type="text" id="milestoneLabelInput" placeholder="Milestone Label" />
+      <input type="date" id="milestoneDateInput" placeholder="Milestone End Date" />
+      <button id="milestoneSaveBtn">Add Milestone</button>
+      <div id="milestoneList"></div>
+      <div class="modal-buttons">
+        <button id="btnProjectSave">Save</button>
+        <button id="btnProjectDelete">Delete Project</button>
+        <button id="btnProjectClose">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Modal -->
+  <div id="teamModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="teamModalTitle">
+    <div class="modalContent">
+      <h3 id="teamModalTitle">EDIT TEAM</h3>
+      <select id="roleSelect" aria-label="Select role">
+        <option value="TEAM LEAD">TEAM LEAD</option>
+        <option value="WELDER">WELDER</option>
+        <option value="INSTALLER">INSTALLER</option>
+        <option value="QC">QC</option>
+      </select>
+      <input type="text" id="memberName" placeholder="Enter name" />
+      <button id="btnTeamSave">Save</button>
+      <button id="btnTeamClose">Cancel</button>
+      <div id="memberList"></div>
+    </div>
+  </div>
+
+  <!-- XLSX (SheetJS) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
