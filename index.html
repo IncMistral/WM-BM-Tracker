@@ -1528,10 +1528,17 @@ let currentRole = null; // "admin" | "user"
 
 let users = {};  // will be filled in init()
 
-function saveUsers() {
-  localStorage.setItem("bm-tracker:users", JSON.stringify(users));
+async function saveUsers() {
+  try {
+    const ok = await saveUsersToServer(users);
+    if (!ok) {
+      alert("⚠️ Failed to save users to server.");
+    }
+  } catch (e) {
+    console.error("Error saving users:", e);
+    alert("⚠️ Error saving users.");
+  }
 }
-
 function applyUserRestrictions() {
   // Hide restricted buttons
   document.getElementById("btnNewGroup").style.display = "none";
@@ -1914,4 +1921,5 @@ function wirePasswordToggles() {
   })();
   </script>
 </body>
+
 </html>
