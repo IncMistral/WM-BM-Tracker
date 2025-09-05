@@ -1873,7 +1873,13 @@ function wirePasswordToggles() {
   if (serverUsers && Array.isArray(serverUsers)) {
     users = {};
     serverUsers.forEach(u => { users[u.user] = u; });
-
+  } else {
+    users = {
+      admin: { user: "admin", pass: "admin123", role: "admin" },
+      user:  { user: "user",  pass: "user123",  role: "user"  },
+      dev:   { user: "dev",   pass: "dev123",   role: "dev"   }
+    };
+  }
 
   // Always load something on startup, even before login
   let ok = await loadFromServer(2, 1200);
@@ -1898,7 +1904,7 @@ function wirePasswordToggles() {
       document.getElementById("loginStatus").style.display = "inline-block";
 
     } else if (currentRole === "dev") {
-      document.getElementById("loginStatus").textContent = "Logged in as: Dev";
+      document.getElementById("loginStatus").textContent = "Logged in as: dev";
       document.getElementById("loginStatus").style.display = "inline-block";
 
       // Dev should choose source after login
@@ -1909,4 +1915,3 @@ function wirePasswordToggles() {
   </script>
 </body>
 </html>
-
