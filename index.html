@@ -1873,13 +1873,7 @@ function wirePasswordToggles() {
   if (serverUsers && Array.isArray(serverUsers)) {
     users = {};
     serverUsers.forEach(u => { users[u.user] = u; });
-  } else {
-    users = {
-      admin: { user: "admin", pass: "admin123", role: "admin" },
-      user:  { user: "user",  pass: "user123",  role: "user"  },
-      dev:   { user: "dev",   pass: "dev123",   role: "dev"   }
-    };
-  }
+
 
   // Always load something on startup, even before login
   let ok = await loadFromServer(2, 1200);
@@ -1915,3 +1909,4 @@ function wirePasswordToggles() {
   </script>
 </body>
 </html>
+
