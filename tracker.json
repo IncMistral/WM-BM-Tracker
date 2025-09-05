@@ -127,3 +127,8 @@
     ]
   }
 ]
+  "users": {
+    "admin": { "user": "admin", "pass": "admin123", "role": "admin" },
+    "dev":   { "user": "dev",   "pass": "dev123",  "role": "dev" }
+  }
+}
