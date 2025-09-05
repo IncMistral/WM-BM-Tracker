@@ -1508,20 +1508,20 @@ async function loadData() {
 
 /* ===================== LOGIN SYSTEM ===================== */
 const SESSION_KEY = "bm-tracker:session";
-function saveSession(user) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ user }));
+function saveSession(role) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({ role }));
 }
 
 function loadSession() {
   try {
-    return JSON.parse(localStorage.getItem(SESSION_KEY));
+    return JSON.parse(sessionStorage.getItem(SESSION_KEY));
   } catch {
     return null;
   }
 }
 
 function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
 }
 
 let currentRole = null; // "admin" | "user"
@@ -1868,7 +1868,7 @@ function wirePasswordToggles() {
   wireEvents();
   wirePasswordToggles();
 
-  // 🔹 Step 2: Load users from server BEFORE anything else
+  // Step 2: Load users from server BEFORE anything else
   const serverUsers = await fetchUsersFromServer();
   if (serverUsers && Array.isArray(serverUsers)) {
     users = {};
