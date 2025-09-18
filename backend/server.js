@@ -1,4 +1,19 @@
-// Use persistent disk path on Render
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
+
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+// Allow cross-origin requests (so frontend can call backend)
+app.use(cors());
+app.use(express.json());
+
+// Serve static frontend (index.html, etc.) from ../public
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+// ✅ Use persistent disk path on Render
 const DATA_FILE = path.join("/backend", "data.json");
 
 // Ensure data file exists
@@ -34,4 +49,9 @@ app.post("/api/save", (req, res) => {
   }
   saveData(newData);
   res.json({ status: "ok" });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
