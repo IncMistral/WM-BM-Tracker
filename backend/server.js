@@ -44,9 +44,9 @@ app.get("/api/data", (req, res) => {
 // POST new groups + logs
 app.post("/api/save", (req, res) => {
   const newData = req.body;
-  if (!newData || !newData.groups || !newData.logs) {
-    return res.status(400).json({ error: "Missing groups or logs" });
-  }
+if (!newData || !Array.isArray(newData.groups) || !Array.isArray(newData.logs)) {
+  return res.status(400).json({ error: "Groups and logs must be arrays" });
+}
   saveData(newData);
   res.json({ status: "ok" });
 });
