@@ -13,7 +13,7 @@ app.use(express.json());
 // Serve static frontend (index.html, etc.) from ../public
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-const DATA_FILE = path.join(__/backend, "data.json");
+const DATA_FILE = path.join("/backend", "data.json");
 
 // Load data
 function loadData() {
