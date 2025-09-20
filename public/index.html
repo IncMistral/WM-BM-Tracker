@@ -937,25 +937,24 @@ const logsForDate = logs.filter(l => {
           }
 
           document.getElementById("btnDeleteLogs").onclick = async () => {
-            const dd = document.getElementById("logDropdown");
-            if (!dd || !dd.value) return;
+  const password = prompt("Enter password to delete logs:");
+  if (password !== "guest820") {
+    alert("Incorrect password. Logs were not deleted.");
+    return;
+  }
 
-            const date = dd.value;
-            const password = prompt("Enter password to delete logs:");
-            if (password !== "guest820") {
-              alert("Incorrect password. Logs were not deleted.");
-              return;
-            }
+  if (!confirm("Are you sure you want to delete ALL logs for this group?")) return;
 
-            if (!confirm("Are you sure you want to delete all logs for " + date + "?")) return;
+  // 🔴 Call the new endpoint (delete all logs for this group, any date)
+  await fetch("/api/logs/" + encodeURIComponent(groupName), {
+    method: "DELETE"
+  });
 
-            await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(date), {
-              method: "DELETE"
-            });
+  // Clear the UI
+  refreshLogDropdown(groupName);
+  document.getElementById("logContent").innerHTML = "";
+};
 
-            refreshLogDropdown(groupName);
-            document.getElementById("logContent").innerHTML = "";
-          };
         };
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -2731,5 +2730,4 @@ const g = groups[gi];
 </div>
 </body>
 </html>
-
 
