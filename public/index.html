@@ -1394,7 +1394,6 @@ function openGroupModal(gi) {
 function saveGroup() {
   if (!contextTarget || contextTarget.groupIndex == null) {
 const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
-groups.push(newGroup);
 const gi = groups.length - 1;
     addLogEntry(newGroup.name, "group-create", { name: g.name });
     saveData();
