@@ -790,12 +790,11 @@ compileBtn.onclick = () => {
       <!-- Daily logs output -->
       <div id="logContent" style="margin-top:1rem;"></div>
 
-      <script>
-        // The group name is baked into this page
-        const groupName = "${g.name}";
-          // Inject logs into this new tab
-        const logs = JSON.parse(${JSON.stringify(JSON.stringify(logs))});
-
+<script>
+  // The group name is baked into this page
+  const groupName = ${JSON.stringify(g.name)};
+  // Inject logs into this new tab
+  const logs = ${JSON.stringify(logs)};
 
 
         // Populate the dropdown with this group's log index
