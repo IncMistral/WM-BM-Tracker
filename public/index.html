@@ -749,9 +749,13 @@ if (currentUser?.role === "admin") {
   const compileBtn = document.createElement("button");
   compileBtn.textContent = "Compile";
 
-  compileBtn.onclick = () => {
+compileBtn.onclick = () => {
+  const reportHTML = showReportPage(g);   // add this line
+  const newTab = window.open("", "_blank");
+ 
 
-newTab.document.write(`
+  newTab.document.write(`
+
   <!DOCTYPE html>
   <html>
     <head>
