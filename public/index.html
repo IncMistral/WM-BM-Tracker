@@ -1376,23 +1376,20 @@ function saveGroup() {
 
 if (!contextTarget || contextTarget.groupIndex == null) {
   // --- New group ---
-  const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
-  groups.push(newGroup);
-  const gi = groups.length - 1;
+// in saveGroup(), new group branch:
+const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
+groups.push(newGroup);
+const gi = groups.length - 1;
 
-  // Force group-create log to be global
-  logs.push({
-    ts: Date.now(),
-    date: new Date().toISOString().split("T")[0],
-    group: "UnknownGroup",   // 👈 ensures it shows up for all
-    user: currentUser?.username || "unknown",
-    type: "group-create",
-    details: { groupIndex: gi, name: newGroup.name }
-  });
+// Use addLogEntry instead of manual push
+addLogEntry(newGroup.name, "group-create", {
+  groupIndex: gi,
+  name: newGroup.name
+});
 
-  saveData();
-  render();
-  refreshLogDropdown(groupName);
+saveData();
+render();
+refreshLogDropdown(groupName);
 }
 }
 
