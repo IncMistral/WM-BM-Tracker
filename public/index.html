@@ -1390,17 +1390,7 @@ function openGroupModal(gi) {
 
   function closeGroupModal() { closeModal("groupModal"); }
 
-  // CREATE GROUP //  
-function saveGroup() {
-  if (!contextTarget || contextTarget.groupIndex == null) {
-const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
-const gi = groups.length - 1;
-    addLogEntry(newGroup.name, "group-create", { name: g.name });
-    saveData();
-    render();
-    refreshLogDropdown(newGroup.name);
-  }
-}
+
 
 // DELETE GROUP//
 function deleteGroup() {
