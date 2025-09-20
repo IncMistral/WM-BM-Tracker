@@ -795,16 +795,18 @@ newTab.document.write(`
         // Inject logs into this new tab
         const logs = ${JSON.stringify(logs)};
 
-        // Render logs for a given date
-        function viewCompiledLogs(date) {
-          const logsForDate = logs.filter(l => {
-            if (l.date !== date) return false;
-            if (!l.group) return true; // allow missing groups
-            return (
-              l.group.toLowerCase() === groupName.toLowerCase() ||
-              l.group.toLowerCase() === "unknowngroup"
-            );
-          }).sort((a, b) => a.ts - b.ts);
+const logsForDate = logs.filter(l => {
+  if (l.date !== date) return false;
+
+  // Always include group-create and group-delete regardless of group
+  if (l.type === "group-create" || l.type === "group-delete") return true;
+
+  if (!l.group) return true; // allow missing groups
+  return (
+    l.group.toLowerCase() === groupName.toLowerCase() ||
+    l.group.toLowerCase() === "unknowngroup"
+  );
+}).sort((a, b) => a.ts - b.ts);
 
           const container = document.getElementById("logContent");
           if (!logsForDate.length) {
@@ -858,12 +860,16 @@ newTab.document.write(`
             const dates = Array.from(new Set(
               allLogs
                 .filter(l => {
-                  if (!l.group) return false;
-                  return (
-                    l.group.toLowerCase() === groupName.toLowerCase() ||
-                    l.group.toLowerCase() === "unknowngroup"
-                  );
-                })
+  // Always include group-create and group-delete regardless of group
+  if (l.type === "group-create" || l.type === "group-delete") return true;
+
+  if (!l.group) return false;
+  return (
+    l.group.toLowerCase() === groupName.toLowerCase() ||
+    l.group.toLowerCase() === "unknowngroup"
+  );
+})
+
                 .map(l => l.date)
             )).sort();
 
