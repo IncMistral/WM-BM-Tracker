@@ -1354,7 +1354,7 @@ del.addEventListener("click", () => {
     });
   }
   
-  /* ===================== GROUP MODAL: OPEN / SAVE / DELETE (OFFLINE) ===================== */
+  /* ===================== GROUP MODAL: OPEN / SAVE / DELETE  ===================== */
   function setGroupModalControlsDisabled(disabled){
     ["btnGroupEditTeam","btnGroupNewProject",
      "btnGroupSave","btnGroupDelete","btnGroupClose"].forEach(id => {
@@ -1392,14 +1392,9 @@ function openGroupModal(gi) {
 function newGroup() {
   const newGroup = { name: "New Group", projects: [], teamMembers: [] };
   groups.push(newGroup);
-
-  // 🔄 Log creation immediately
-  addLogEntry(newGroup.name, "group-create", { name: newGroup.name });
   compileDailyLogs();
-
   saveData();
   render();
-
   // Open modal to edit right away
   contextTarget = { groupIndex: groups.length - 1 };
   openGroupModal(groups.length - 1);
@@ -2090,7 +2085,6 @@ closeModal('milestoneModal');
   }
 
   /* ===================== TOOLBAR WIRING ===================== */
-/* ===================== TOOLBAR WIRING (OFFLINE) ===================== */
 function wireToolbar() {
   const btnNewGroup = document.getElementById('btnNewGroup');
   const btnSave     = document.getElementById('btnSave');
