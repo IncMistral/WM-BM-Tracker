@@ -861,16 +861,19 @@ const logsForDate = logs.filter(l => {
             console.log("Logs returned from server:", allLogs);
 
             const dates = Array.from(new Set(
-              allLogs
-                .filter(l => {
-                  if (!l.group) return false;
-                  return (
-                    l.group.toLowerCase() === groupName.toLowerCase() ||
-                    l.group.toLowerCase() === "unknowngroup"
-                  );
-                })
-                .map(l => l.date)
-            )).sort();
+  allLogs
+    .filter(l => {
+      // Always include group-create and group-delete regardless of group
+      if (l.type === "group-create" || l.type === "group-delete") return true;
+
+      if (!l.group) return false;
+      return (
+        l.group.toLowerCase() === groupName.toLowerCase() ||
+        l.group.toLowerCase() === "unknowngroup"
+      );
+    })
+    .map(l => l.date)
+)).sort();
 
             const dd = document.getElementById("logDropdown");
             dd.innerHTML = "";
@@ -1377,6 +1380,7 @@ function saveGroup() {
     groups.push(newGroup);
     const gi = groups.length - 1;
     addLogEntry(newGroup.name, "group-create", { groupIndex: gi, name: newGroup.name });
+    refreshLogDropdown(groupName);
   } else {
     // --- Editing existing group ---
     const idx = contextTarget.groupIndex;
