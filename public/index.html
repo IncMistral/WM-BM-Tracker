@@ -1390,13 +1390,20 @@ function openGroupModal(gi) {
   function closeGroupModal() { closeModal("groupModal"); }
 
 function newGroup() {
- // 🔄 Log creation immediately
+  const newGroup = { name: "New Group", projects: [], teamMembers: [] };
+  groups.push(newGroup);
+
+  // 🔄 Log creation immediately
   addLogEntry(newGroup.name, "group-create", { name: newGroup.name });
   compileDailyLogs();
+
   saveData();
   render();
-}
 
+  // Open modal to edit right away
+  contextTarget = { groupIndex: groups.length - 1 };
+  openGroupModal(groups.length - 1);
+}
 
 // DELETE GROUP//
 function deleteGroup() {
@@ -1421,7 +1428,8 @@ function deleteGroup() {
   const btnSave   = document.getElementById("btnGroupSave");
   const btnClose  = document.getElementById("btnGroupClose");
   const btnDelete = document.getElementById("btnGroupDelete");
-  
+  const btnNewGroup = document.getElementById("btnNewGroup");
+  if (btnNewGroup) btnNewGroup.onclick = newGroup;
   const btnEditTeam = document.getElementById("btnGroupEditTeam");
   const btnNewProj = document.getElementById("btnGroupNewProject");
   if (btnNewProj) btnNewProj.onclick = () => newProjectFromGroup();
