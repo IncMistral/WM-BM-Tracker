@@ -520,7 +520,6 @@ function addLogEntry(groupName, type, details) {
 }
 
 
-
 /* ===================== DAILY LOG COMPILER ===================== */
 function compileDailyLogs() {
   if (!logs.length) return;
@@ -540,9 +539,31 @@ function compileDailyLogs() {
     compiled[key].push(log);
   });
 
-
   // Replace localStorage approach with server persistence
   console.log("📦 Compiled logs ready:", compiled);
+
+  // ✅ Render logs into daily log panel
+  const logContainer = document.getElementById("logContent");
+  if (logContainer) {
+    logContainer.innerHTML = "";
+    Object.keys(compiled).forEach(key => {
+      compiled[key].forEach(log => {
+        const div = document.createElement("div");
+        div.className = "log-entry";
+
+        if (log.type === "group-create") {
+          div.textContent = `${log.user} created group "${log.group}"`;
+        } else if (log.type === "group-delete") {
+          div.textContent = `${log.user} deleted group "${log.group}"`;
+        } else {
+          // Fallback for all other log types
+          div.textContent = `${log.user} ${log.type} ${log.group}`;
+        }
+
+        logContainer.appendChild(div);
+      });
+    });
+  }
 
   // Persist to server
   saveData();
