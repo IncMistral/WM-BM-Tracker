@@ -1390,6 +1390,7 @@ function openGroupModal(gi) {
   function closeGroupModal() { closeModal("groupModal"); }
 
 function newGroup() {
+   addLogEntry(null, "button-press", { button: "new-group" });
   const newGroup = { name: "New Group", projects: [], teamMembers: [] };
   groups.push(newGroup);
 
