@@ -1369,50 +1369,37 @@ function openGroupModal(gi) {
 
   function closeGroupModal() { closeModal("groupModal"); }
 
-  // Create on Save if new; otherwise update name
+  // CREATE GROUP //  
 function saveGroup() {
   const nameInp = document.getElementById("groupNameInput");
   const enteredName = (nameInp instanceof HTMLInputElement) ? nameInp.value.trim() : "";
-
 if (!contextTarget || contextTarget.groupIndex == null) {
-  // --- New group ---
-// in saveGroup(), new group branch:
 const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
 groups.push(newGroup);
 const gi = groups.length - 1;
-
-// Use addLogEntry instead of manual push
 addLogEntry(newGroup.name, "group-create", {
   groupIndex: gi,
   name: newGroup.name
 });
-
-saveData();
-render();
-refreshLogDropdown(newGroup.Name);
+    compileDailyLogs();
+    saveData();
+    render();
+    refreshLogDropdown(newGroup.Name);
+  }
 }
-}
 
+// DELETE GROUP//
 function deleteGroup() {
   if (!contextTarget || contextTarget.groupIndex == null) {
     alert("No group selected to delete.");
     return;
   }
-
   const gi = contextTarget.groupIndex;
   const g = groups[gi];
-
   if (confirm("Delete group " + g.name + "?")) {
-    // ✅ Remove the group from the array
-    groups.splice(gi, 1);
-
-    // ✅ Log deletion before closing
+        groups.splice(gi, 1);
     addLogEntry(g.name, "group-delete", { name: g.name });
-
-    // ✅ Save changes to backend
     saveData();
-
-    // ✅ Close modal and re-render
     closeGroupModal();
     render();
   }
