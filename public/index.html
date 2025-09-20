@@ -478,14 +478,7 @@ document.getElementById("btnNewGroup").addEventListener("click", () => {
   // ✅ Log creation under its own name
   addLogEntry(newGroup.name, "group-create", { name: newGroup.name });
 
-  // ✅ Also log it under every other group (broadcast note)
-  groups.forEach(g => {
-    if (g.name !== newGroup.name) {
-      addLogEntry(g.name, "log-note", {
-        message: `New group "${newGroup.name}" was created`
-      });
-    }
-  });
+
 
   saveData();
   render();
