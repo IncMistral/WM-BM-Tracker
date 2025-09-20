@@ -754,7 +754,7 @@ compileBtn.onclick = () => {
   const newTab = window.open("", "_blank");
  
 
-  newTab.document.write(`
+newTab.document.write(`
 
   <!DOCTYPE html>
   <html>
@@ -778,120 +778,115 @@ compileBtn.onclick = () => {
       <hr />
 
       <!-- Daily logs controls -->
-<div>
-  <label for="logDropdown">Daily Logs:</label>
-  <select id="logDropdown"></select>
-  <button id="btnViewLogs">View Logs</button>
-  <button id="btnDeleteLogs" class="danger">Delete Logs</button>
-  <button id="btnExportLogs">Export to Excel</button>
-</div>
-
+      <div>
+        <label for="logDropdown">Daily Logs:</label>
+        <select id="logDropdown"></select>
+        <button id="btnViewLogs">View Logs</button>
+        <button id="btnDeleteLogs" class="danger">Delete Logs</button>
+        <button id="btnExportLogs">Export to Excel</button>
+      </div>
 
       <!-- Daily logs output -->
       <div id="logContent" style="margin-top:1rem;"></div>
 
-<script>
-  // The group name is baked into this page
-  const groupName = ${JSON.stringify(g.name)};
-  // Inject logs into this new tab
-  const logs = ${JSON.stringify(logs)};
-<\/script>
+      <script>
+        // The group name is baked into this page
+        const groupName = ${JSON.stringify(g.name)};
+        // Inject logs into this new tab
+        const logs = ${JSON.stringify(logs)};
 
+        // Render logs for a given date
+        function viewCompiledLogs(date) {
+          const logsForDate = logs.filter(l => {
+            if (l.date !== date) return false;
+            if (!l.group) return true; // allow missing groups
+            return (
+              l.group.toLowerCase() === groupName.toLowerCase() ||
+              l.group.toLowerCase() === "unknowngroup"
+            );
+          }).sort((a, b) => a.ts - b.ts);
 
-// Render logs for a given date
-function viewCompiledLogs(date) {
-const logsForDate = logs.filter(l => {
-  if (l.date !== date) return false;
-  if (!l.group) return true; // allow missing groups
-  return (
-    l.group.toLowerCase() === groupName.toLowerCase() ||
-    l.group.toLowerCase() === "unknowngroup"
-  );
-}).sort((a, b) => a.ts - b.ts);
+          const container = document.getElementById("logContent");
+          if (!logsForDate.length) {
+            container.innerHTML = "<p><em>No logs for " + date + "</em></p>";
+            return;
+          }
 
-  const container = document.getElementById("logContent");
-  if (!logsForDate.length) {
-    container.innerHTML = "<p><em>No logs for " + date + "</em></p>";
-    return;
-  }
+          let html = "<h2>Logs for " + date + "</h2>";
+          html += "<table><tr><th>Time</th><th>User</th><th>Type</th><th>Details</th></tr>";
 
-  let html = "<h2>Logs for " + date + "</h2>";
-  html += "<table><tr><th>Time</th><th>User</th><th>Type</th><th>Details</th></tr>";
+          logsForDate.forEach(function(l) {
+            const time = new Date(l.ts).toLocaleTimeString();
+            const d = l.details || {};
+            let detailText = "";
 
-  logsForDate.forEach(function(l) {
-    const time = new Date(l.ts).toLocaleTimeString();
-    const d = l.details || {};
-    let detailText = "";
+            switch (l.type) {
+              case "login": detailText = "User " + (d.username || l.user) + " logged in"; break;
+              case "logout": detailText = "User " + (d.username || l.user) + " logged out"; break;
+              case "group-create": detailText = "Group created: " + (d.name || ""); break;
+              case "group-delete": detailText = "Group deleted: " + (d.name || ""); break;
+              case "project-create": detailText = "Project created: " + (d.name || ""); break;
+              case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
+              case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
+              case "milestone-edit": detailText = "Milestone edited: " + (d.label || ""); break;
+              case "milestone-delete": detailText = "Milestone deleted: " + (d.label || ""); break;
+              default: detailText = JSON.stringify(d);
+            }
 
-    switch (l.type) {
-      case "login": detailText = "User " + (d.username || l.user) + " logged in"; break;
-      case "logout": detailText = "User " + (d.username || l.user) + " logged out"; break;
-      case "group-create": detailText = "Group created: " + (d.name || ""); break;
-      case "group-delete": detailText = "Group deleted: " + (d.name || ""); break;
-      case "project-create": detailText = "Project created: " + (d.name || ""); break;
-      case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
-      case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
-      case "milestone-edit": detailText = "Milestone edited: " + (d.label || ""); break;
-      case "milestone-delete": detailText = "Milestone deleted: " + (d.label || ""); break;
-      default: detailText = JSON.stringify(d);
-    }
+            html += "<tr>" +
+                      "<td>" + time + "</td>" +
+                      "<td>" + (l.user || "unknown") + "</td>" +
+                      "<td>" + l.type + "</td>" +
+                      "<td>" + detailText + "</td>" +
+                    "</tr>";
+          });
 
-    html += "<tr>" +
-              "<td>" + time + "</td>" +
-              "<td>" + (l.user || "unknown") + "</td>" +
-              "<td>" + l.type + "</td>" +
-              "<td>" + detailText + "</td>" +
-            "</tr>";
-  });
-
-  html += "</table>";
-  container.innerHTML = html;
-}
+          html += "</table>";
+          container.innerHTML = html;
+        }
 
         let logsVisible = false;
         let currentDate = null;
-  
-async function refreshLogDropdown(groupName) {
-  try {
-    const res = await fetch("/api/logs");
-    const allLogs = await res.json();
 
-    console.log("Logs returned from server:", allLogs);
+        async function refreshLogDropdown(groupName) {
+          try {
+            const res = await fetch("/api/logs");
+            const allLogs = await res.json();
 
-    // ✅ Only include dates for the current group
-    const dates = Array.from(new Set(
-      allLogs
-        .filter(l => {
-          if (!l.group) return false;
-          return (
-            l.group.toLowerCase() === groupName.toLowerCase() ||
-            l.group.toLowerCase() === "unknowngroup"
-          );
-        })
-        .map(l => l.date)
-    )).sort();
+            console.log("Logs returned from server:", allLogs);
 
-    const dd = document.getElementById("logDropdown");
-    dd.innerHTML = "";
+            const dates = Array.from(new Set(
+              allLogs
+                .filter(l => {
+                  if (!l.group) return false;
+                  return (
+                    l.group.toLowerCase() === groupName.toLowerCase() ||
+                    l.group.toLowerCase() === "unknowngroup"
+                  );
+                })
+                .map(l => l.date)
+            )).sort();
 
-    if (dates.length === 0) {
-      const opt = document.createElement("option");
-      opt.textContent = "No logs available for " + groupName;
-      opt.disabled = true;
-      dd.appendChild(opt);
-    } else {
-      dates.forEach(d => {
-        const opt = document.createElement("option");
-        opt.value = d;
-        opt.textContent = d;
-        dd.appendChild(opt);
-      });
-    }
-  } catch (err) {
-    console.error("Failed to refresh dropdown:", err);
-  }
-}
+            const dd = document.getElementById("logDropdown");
+            dd.innerHTML = "";
 
+            if (dates.length === 0) {
+              const opt = document.createElement("option");
+              opt.textContent = "No logs available for " + groupName;
+              opt.disabled = true;
+              dd.appendChild(opt);
+            } else {
+              dates.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.textContent = d;
+                dd.appendChild(opt);
+              });
+            }
+          } catch (err) {
+            console.error("Failed to refresh dropdown:", err);
+          }
+        }
 
         document.getElementById("btnViewLogs").onclick = () => {
           const dd = document.getElementById("logDropdown");
@@ -901,116 +896,105 @@ async function refreshLogDropdown(groupName) {
           const container = document.getElementById("logContent");
 
           if (!logsVisible || currentDate !== date) {
-            // Show logs (or switch to a new date)
             viewCompiledLogs(date);
             logsVisible = true;
             currentDate = date;
             document.getElementById("btnViewLogs").textContent = "Hide Logs";
           } else {
-            // Collapse logs
             container.innerHTML = "";
             logsVisible = false;
             currentDate = null;
             document.getElementById("btnViewLogs").textContent = "View Logs";
           }
 
-          // Delete logs for the selected date (with password protection)
-document.getElementById("btnDeleteLogs").onclick = async () => {
-  const dd = document.getElementById("logDropdown");
-  if (!dd || !dd.value) return;
+          document.getElementById("btnDeleteLogs").onclick = async () => {
+            const dd = document.getElementById("logDropdown");
+            if (!dd || !dd.value) return;
 
-  const date = dd.value;
+            const date = dd.value;
+            const password = prompt("Enter password to delete logs:");
+            if (password !== "guest820") {
+              alert("Incorrect password. Logs were not deleted.");
+              return;
+            }
 
-  // ✅ Ask for password
-  const password = prompt("Enter password to delete logs:");
-  if (password !== "guest820") {
-    alert("Incorrect password. Logs were not deleted.");
-    return;
-  }
+            if (!confirm("Are you sure you want to delete all logs for " + date + "?")) return;
 
-  if (!confirm("Are you sure you want to delete all logs for " + date + "?")) return;
+            await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(date), {
+              method: "DELETE"
+            });
 
-  await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(date), {
-    method: "DELETE"
-  });
+            refreshLogDropdown(groupName);
+            document.getElementById("logContent").innerHTML = "";
+          };
+        };
 
-  refreshLogDropdown(groupName);
-  document.getElementById("logContent").innerHTML = ""; // Clear display
-}
+        document.addEventListener("DOMContentLoaded", () => {
+          refreshLogDropdown(groupName);
+          console.log("✅ Dropdown initialized for", groupName);
+        });
 
+        document.getElementById("btnExportLogs").onclick = function () {
+          var dd = document.getElementById("logDropdown");
+          if (!dd || !dd.value) {
+            alert("Please select a log date to export.");
+            return;
+          }
+          var date = dd.value;
 
-       // Init dropdown after DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-  refreshLogDropdown(groupName);
-  console.log("✅ Dropdown initialized for", groupName);
-});
+          var logsForDate = logs.filter(l => {
+            if (l.date !== date) return false;
+            if (!l.group) return true;
+            return (
+              l.group.toLowerCase() === groupName.toLowerCase() ||
+              l.group.toLowerCase() === "unknowngroup"
+            );
+          }).sort((a, b) => a.ts - b.ts);
 
-        // Export only the selected log date
-document.getElementById("btnExportLogs").onclick = function () {
-  var dd = document.getElementById("logDropdown");
-  if (!dd || !dd.value) {
-    alert("Please select a log date to export.");
-    return;
-  }
-  var date = dd.value;
+          var logsSorted = logsForDate;
 
-  var logsForDate = logs.filter(l => {
-  if (l.date !== date) return false;
-  if (!l.group) return true; // allow missing groups
-  return (
-    l.group.toLowerCase() === groupName.toLowerCase() ||
-    l.group.toLowerCase() === "unknowngroup"
-  );
-}).sort((a, b) => a.ts - b.ts);
+          if (!logsSorted.length) {
+            alert("No logs available for " + date);
+            return;
+          }
 
-var logsSorted = logsForDate;
+          var csv = "Time,User,Type,Details\\n";
+          for (var i = 0; i < logsSorted.length; i++) {
+            var l = logsSorted[i];
+            var time = new Date(l.ts).toLocaleString();
+            var user = l.user || "";
+            var type = l.type || "";
+            var details = "";
+            try {
+              details = (type === "invalid-login")
+                ? ("Invalid login attempt by user: " + (((l.details && l.details.attemptedUser) || "(blank)")).toString().replace(/"/g, "''"))
+                : JSON.stringify(l.details).replace(/"/g, "''");
+            } catch (e) {}
+            csv += time + "," + user + "," + type + "," + details + "\\n";
+          }
 
-
-  if (!logsSorted.length) {
-  alert("No logs available for " + date);
-  return;
-}
-
-var csv = "Time,User,Type,Details\\n";
-for (var i = 0; i < logsSorted.length; i++) {
-  var l = logsSorted[i];
-  var time = new Date(l.ts).toLocaleString();
-  var user = l.user || "";
-  var type = l.type || "";
-  var details = "";
-  try {
-    details = (type === "invalid-login")
-      ? ("Invalid login attempt by user: " + (((l.details && l.details.attemptedUser) || "(blank)")).toString().replace(/"/g, "''"))
-      : JSON.stringify(l.details).replace(/"/g, "''");
-  } catch (e) {}
-  csv += time + "," + user + "," + type + "," + details + "\\n";
-}
-
-
-  var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  var url = URL.createObjectURL(blob);
-  var link = document.createElement("a");
-  link.href = url;
-  link.download = groupName + "_" + date + "_logs.csv";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-
+          var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement("a");
+          link.href = url;
+          link.download = groupName + "_" + date + "_logs.csv";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        };
       <\/script>
     </body>
   </html>
 `);
 
-  newTab.document.close();
+newTab.document.close();
 
-  // 🔄 Also push the current in-memory data immediately
-  if (newTab.renderReport) {
-    newTab.renderReport(g);
-  }
-};
-
+// 🔄 Also push the current in-memory data immediately
+if (newTab.renderReport) {
+  newTab.renderReport(g);
+}
+}
 
 
 // 🔧 manual styling and positioning relative to timeline left edge
