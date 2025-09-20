@@ -76,26 +76,24 @@ app.post("/api/logs", (req, res) => {
   res.json({ status: "ok", log: newLog });
 });
 
-// DELETE logs for a specific group/date
-app.delete("/api/logs/:group/:date", (req, res) => {
-  const { group, date } = req.params;
+// DELETE a specific log by timestamp
+app.delete("/api/logs/:ts", (req, res) => {
+  const { ts } = req.params;
   const data = loadData();
 
-  // Keep everything except logs matching this group+date
+  // Keep everything except the one log with matching ts
   const before = data.logs.length;
-  data.logs = data.logs.filter(
-    (l) => !(l.group === group && l.date === date)
-  );
+  data.logs = data.logs.filter((l) => String(l.ts) !== String(ts));
   const after = data.logs.length;
 
   saveData(data);
   res.json({
     status: "deleted",
-    group,
-    date,
+    ts,
     removed: before - after,
   });
 });
+
 
 // ======================================================== //
 
