@@ -1390,7 +1390,6 @@ function openGroupModal(gi) {
   function closeGroupModal() { closeModal("groupModal"); }
 
 function newGroup() {
-   addLogEntry(null, "button-press", { button: "new-group" });
   const newGroup = { name: "New Group", projects: [], teamMembers: [] };
   groups.push(newGroup);
 
@@ -2090,34 +2089,24 @@ closeModal('milestoneModal');
     catch (e) { console.warn('ViewState save failed:', e); }
   }
 
-  /* ===================== TOOLBAR WIRING (OFFLINE) ===================== */
-  function wireToolbar() {
-    const btnNewGroup = document.getElementById('btnNewGroup');
-    const btnSave     = document.getElementById('btnSave');
-    const btnLoad     = document.getElementById('btnLoad');
-    const fileInput   = document.getElementById('jsonFileInput');
+  /* ===================== TOOLBAR WIRING ===================== */
+/* ===================== TOOLBAR WIRING (OFFLINE) ===================== */
+function wireToolbar() {
+  const btnNewGroup = document.getElementById('btnNewGroup');
+  const btnSave     = document.getElementById('btnSave');
+  const btnLoad     = document.getElementById('btnLoad');
+  const fileInput   = document.getElementById('jsonFileInput');
 
-
-if (btnNewGroup) {
-  btnNewGroup.onclick = () => {
-    // Create a new group object with default values
-    const newGroup = {
-      name: "New Group",
-      teamMembers: [],
-      projects: []
+  if (btnNewGroup) {
+    btnNewGroup.onclick = () => {
+      // ✅ use the logging-enabled newGroup() function
+      newGroup();
     };
+  }
 
-    // Add it to the list
-    groups.push(newGroup);
-    const gi = groups.length - 1;
-
-      // Save and re-render the timeline
-    saveData();
-    render();
-  };
+  // You can still wire up save/load/fileInput below if needed
 }
 
-}
 
 /* ===================== BOOT / INIT ===================== */
 (function init() {
