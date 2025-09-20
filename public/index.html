@@ -1374,36 +1374,26 @@ function saveGroup() {
   const nameInp = document.getElementById("groupNameInput");
   const enteredName = (nameInp instanceof HTMLInputElement) ? nameInp.value.trim() : "";
 
-  if (!contextTarget || contextTarget.groupIndex == null) {
-    // --- New group ---
-    const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
-    groups.push(newGroup);
-    const gi = groups.length - 1;
-    addLogEntry(newGroup.name, "group-create", { groupIndex: gi, name: newGroup.name });
-    refreshLogDropdown(groupName);
-  } else {
-    // --- Editing existing group ---
-    const idx = contextTarget.groupIndex;
-    const oldName = groups[idx].name;
-    const newName = enteredName || oldName;
+if (!contextTarget || contextTarget.groupIndex == null) {
+  // --- New group ---
+  const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
+  groups.push(newGroup);
+  const gi = groups.length - 1;
 
-    if (newName !== oldName) {
-      groups[idx].name = newName;
-
-      // ✅ Update existing logs for this group
-      logs.forEach(l => {
-        if (l.group === oldName) {
-          l.group = newName;
-        }
-      });
-
-      addLogEntry(newName, "group-edit", { groupIndex: idx, name: newName });
-    }
-  }
+  // Force group-create log to be global
+  logs.push({
+    ts: Date.now(),
+    date: new Date().toISOString().split("T")[0],
+    group: "UnknownGroup",   // 👈 ensures it shows up for all
+    user: currentUser?.username || "unknown",
+    type: "group-create",
+    details: { groupIndex: gi, name: newGroup.name }
+  });
 
   saveData();
-  closeGroupModal();
   render();
+  refreshLogDropdown(groupName);
+}
 }
 
 function deleteGroup() {
