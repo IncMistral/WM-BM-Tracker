@@ -1387,8 +1387,15 @@ function openGroupModal(gi) {
   setGroupModalControlsDisabled(false);
   openModal("groupModal");
 }
-
   function closeGroupModal() { closeModal("groupModal"); }
+
+function newGroup() {
+ // 🔄 Log creation immediately
+  addLogEntry(newGroup.name, "group-create", { name: newGroup.name });
+  compileDailyLogs();
+  saveData();
+  render();
+}
 
 
 // DELETE GROUP//
