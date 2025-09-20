@@ -465,25 +465,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   render();
 });
 
-// ✅ Wire up + New Group button with full logging
-document.getElementById("btnNewGroup").addEventListener("click", () => {
-  const newGroup = {
-    name: `Group ${groups.length + 1}`,
-    projects: [],
-    teamMembers: []
-  };
-
-  groups.push(newGroup);
-
-  // ✅ Log creation under its own name
-  addLogEntry(newGroup.name, "group-create", { name: newGroup.name });
-
-
-
-  saveData();
-  render();
-});
-
 
   /* ===================== DATE / TIMELINE ===================== */
   function parseLocalDate(yyyy_mm_dd) {
@@ -1408,7 +1389,6 @@ function openGroupModal(gi) {
 }
 
   function closeGroupModal() { closeModal("groupModal"); }
-
 
 
 // DELETE GROUP//
