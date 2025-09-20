@@ -1392,9 +1392,7 @@ function openGroupModal(gi) {
 
   // CREATE GROUP //  
 function saveGroup() {
-  const nameInp = document.getElementById("groupNameInput");
-  const enteredName = (nameInp instanceof HTMLInputElement) ? nameInp.value.trim() : "";
-if (!contextTarget || contextTarget.groupIndex == null) {
+  if (!contextTarget || contextTarget.groupIndex == null) {
 const newGroup = { name: enteredName || "New Group", teamMembers: [], projects: [] };
 groups.push(newGroup);
 const gi = groups.length - 1;
