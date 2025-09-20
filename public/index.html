@@ -939,8 +939,12 @@ document.getElementById("btnDeleteLogs").onclick = async () => {
 }
 
 
-        // Init dropdown
-        refreshLogDropdown(groupName);
+       // Init dropdown after DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  refreshLogDropdown(groupName);
+  console.log("✅ Dropdown initialized for", groupName);
+});
+
         // Export only the selected log date
 document.getElementById("btnExportLogs").onclick = function () {
   var dd = document.getElementById("logDropdown");
