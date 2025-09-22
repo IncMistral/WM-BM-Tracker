@@ -2826,33 +2826,40 @@ const g = groups[gi];
   document.getElementById("trackerWrapper").style.display = "none";
   document.getElementById("reportPage").style.display = "block";
 
-  document.addEventListener("DOMContentLoaded", () => {
-  // ✅ Restore current user from localStorage
+document.addEventListener("DOMContentLoaded", () => {
+  // ✅ 1. Restore session if user was previously logged in
   const savedUser = localStorage.getItem("bm-currentUser");
   if (savedUser) {
     try {
       const parsed = JSON.parse(savedUser);
       setCurrentUser(parsed);
     } catch (e) {
-      console.warn("Failed to parse saved user:", e);
+      console.warn("Could not restore saved user:", e);
       setCurrentUser(null);
     }
   }
 
-  // ✅ Wire login/logout button
+  // ✅ 2. Wire up login/logout button
   const btnLogin = document.getElementById("btnLogin");
   if (btnLogin) {
-    btnLogin.onclick = () => {
+    btnLogin.addEventListener("click", () => {
       if (currentUser) {
+        // logout
         setCurrentUser(null);
         location.reload();
       } else {
+        // login
         openModal("loginModal");
       }
-    };
+    });
+  }
+
+  // ✅ 3. Prevent login modal if already logged in
+  const modalLogin = document.getElementById("loginModal");
+  if (modalLogin && currentUser) {
+    modalLogin.style.display = "none";
   }
 });
-
 
 </script>
 
