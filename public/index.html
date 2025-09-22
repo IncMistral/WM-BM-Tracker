@@ -414,12 +414,6 @@ if (savedUser) {
     currentUser = null;
   }
 }
-if (currentUser) {
-  document.getElementById("btnLogin").style.display = "none";
-  document.getElementById("btnEditUser").style.display =
-    currentUser.role === "admin" ? "inline-block" : "none";
-}
-
          
   /* ===================== LIGHT DOM HELPERS ===================== */
   const $  = (sel, root = document) => root.querySelector(sel);
@@ -940,7 +934,7 @@ const logsForDate = logs.filter(l => {
               );
             })
             .map(l => l.date)
-        )).sort((a, b) => b.localeCompare(a));
+        )).sort().reverse();
 
             const dd = document.getElementById("logDropdown");
             dd.innerHTML = "";
@@ -1422,7 +1416,7 @@ del.addEventListener("click", () => {
 
 function openGroupModal(gi) {
   // NEW: admin-only
-  if (!currentUser || currentUser.role !== "admin") { return; }
+  if (userRole !== "admin") { return; }
 
   contextTarget = { groupIndex: gi };
   const g = groups[gi];
@@ -2336,6 +2330,9 @@ for (let i = 0; i < projectBarRegions.length; i++) {
   document.addEventListener('contextmenu', (e) => e.preventDefault(), { passive: false });
 
   /* ===================== LOGIN / USER PROFILE ===================== */
+// Restore session if it exists
+let loggedInUser = localStorage.getItem("loggedInUser");
+let userRole = localStorage.getItem("userRole");
 
 // Load users from localStorage, or use default admin
 let users = JSON.parse(localStorage.getItem("users")) || [
@@ -2370,14 +2367,10 @@ function handleLogin() {
   }
 
   // ✅ Only after a valid login: set session
-  currentUser = { username: found.username, role: found.role };
-  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
-
-  // Update UI immediately
-  document.getElementById("btnLogin").style.display = "none";
-  document.getElementById("btnEditUser").style.display =
-  currentUser.role === "admin" ? "inline-block" : "none";
-
+  loggedInUser = found.username;
+  userRole     = found.role;
+  localStorage.setItem("loggedInUser", loggedInUser);
+  localStorage.setItem("userRole", userRole);
 
   currentUser = { username: loggedInUser, role: userRole };
   localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
@@ -2457,7 +2450,7 @@ function handleLogin() {
 
 function applyPermissions() {
   const restrictedButtons = ["btnNewGroup", "btnSave", "btnLoad", "btnEditUser"];
-  const isAdmin = currentUser && currentUser.role === "admin";
+  const isAdmin = (userRole === "admin");
   const isLoggedOut = (!loggedInUser);
 
   // Hide/disable top bar buttons unless admin
@@ -2534,13 +2527,13 @@ function wireLoginSystem() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (currentUser) {
+  if (loggedInUser && userRole) {
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) btnLogin.textContent = "Log out";
 
     const btnEditUser = document.getElementById('btnEditUser');
     if (btnEditUser) {
-      btnEditUser.style.display = (currentUser.role === "admin") ? "inline-block" : "none";
+      btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
     }
 
     document.getElementById("screenOverlay").style.display = "none";
@@ -2549,11 +2542,12 @@ document.addEventListener("DOMContentLoaded", () => {
     openModal("loginModal");
   }
 
+  // ✅ Always enforce permissions regardless of login state
   applyPermissions();
+
   wireLoginSystem();
   renderUserList();
 });
-
 
 /* ===================== EDIT USER MODAL ===================== */
 function renderUserList() {
