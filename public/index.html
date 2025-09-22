@@ -855,7 +855,6 @@ const logsForDate = logs.filter(l => {
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
               case "milestone-edit":
-              case "milestone-edit":
               if (d.fromLabel && d.toLabel && d.fromLabel !== d.toLabel) {
                 detailText = "Name changed from " + d.fromLabel + " to " + d.toLabel;
               } else {
@@ -1784,28 +1783,30 @@ btnSave.onclick = () => {
       date: newMs.date || "",
       status: newMs.status || "incomplete"
     });
-  } else {
+
+    } else {
   // --- Editing an existing milestone ---
-  const oldMs = p.milestones[idx]; // keep reference before overwrite
-  const oldLabel = oldMs.label || "";
+  const oldMs     = p.milestones[idx]; 
+  const oldLabel  = oldMs.label  || "";
+  const oldDate   = oldMs.date   || "";
+  const oldStatus = oldMs.status || "incomplete";
 
   payload.status = oldMs.status || "incomplete";
   p.milestones[idx] = payload;
 
   const savedMilestone = p.milestones[idx];
-  addLogEntry(g.name, "milestone-edit", {
+  addLogEntry(g.name,"milestone-edit", {
     groupIndex: gi,
     projectIndex: pi,
     milestoneIndex: idx,
-    fromLabel: oldLabel,                // 👈 old name
-    toLabel: savedMilestone.label || "",// 👈 new name
-    status: savedMilestone.status,
-    date: savedMilestone.date
+    fromLabel: oldLabel,
+    toLabel: savedMilestone.label || "",
+    fromDate: oldDate,
+    toDate: savedMilestone.date || "",
+    fromStatus: oldStatus,
+    toStatus: savedMilestone.status
   });
 }
-
-
-
   compileDailyLogs();
   saveData();
   renderMilestoneList(gi, pi);
