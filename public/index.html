@@ -2834,9 +2834,9 @@ const g = groups[gi];
   document.getElementById("trackerWrapper").style.display = "none";
   document.getElementById("reportPage").style.display = "block";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // ✅ 1. Restore session if user was previously logged in
-  const savedUser = localStorage.getItem("bm-currentUser");
+  const savedUser = sessionStorage.getItem("bm-currentUser");
   if (savedUser) {
     try {
       const parsed = JSON.parse(savedUser);
@@ -2847,25 +2847,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-if (btnLogin) {
-  btnLogin.addEventListener("click", () => {
-    if (currentUser) {
-      // ✅ Logout
-      addLogEntry(currentUser.username, "logout", { username: currentUser.username });
-      setCurrentUser(null);
-      render(); // re-render UI to show Login button
-    } else {
-      // ✅ Show login modal
-      openModal("loginModal");
-    }
-  });
-}
-
-  // ✅ 3. Prevent login modal if already logged in
-  const modalLogin = document.getElementById("loginModal");
-  if (modalLogin && currentUser) {
-    modalLogin.style.display = "none";
+  // ✅ 2. Wire up Login/Logout button
+  const btnLogin = document.getElementById("btnLogin");
+  if (btnLogin) {
+    btnLogin.addEventListener("click", () => {
+      if (currentUser) {
+        // Logout
+        addLogEntry(currentUser.username, "logout", { username: currentUser.username });
+        setCurrentUser(null);
+        render();
+      } else {
+        // Show login modal
+        openModal("loginModal");
+      }
+    });
   }
+
+  // ✅ 3. Load groups/logs from server
+  const loaded = await loadFromServer();
+  if (!loaded) {
+    groups = [];
+  }
+  render();
 });
 
 </script>
