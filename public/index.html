@@ -1778,21 +1778,25 @@ btnSave.onclick = () => {
       status: newMs.status || "incomplete"
     });
   } else {
-    // --- Editing an existing milestone ---
-    // preserve old status if it exists
-    payload.status = p.milestones[idx].status || "incomplete";
-    p.milestones[idx] = payload;
+  // --- Editing an existing milestone ---
+  const oldMs = p.milestones[idx]; // keep reference before overwrite
+  const oldLabel = oldMs.label || "";
 
-    const savedMilestone = p.milestones[idx];
-    addLogEntry(g.name, "milestone-edit", {
-      groupIndex: gi,
-      projectIndex: pi,
-      milestoneIndex: idx,
-      label: savedMilestone.label,
-      status: savedMilestone.status,
-      date: savedMilestone.date
-    });
-  }
+  payload.status = oldMs.status || "incomplete";
+  p.milestones[idx] = payload;
+
+  const savedMilestone = p.milestones[idx];
+  addLogEntry(g.name, "milestone-edit", {
+    groupIndex: gi,
+    projectIndex: pi,
+    milestoneIndex: idx,
+    fromLabel: oldLabel,                // 👈 old name
+    toLabel: savedMilestone.label || "",// 👈 new name
+    status: savedMilestone.status,
+    date: savedMilestone.date
+  });
+}
+
 
 
   compileDailyLogs();
