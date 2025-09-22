@@ -1444,29 +1444,35 @@ function deleteGroup() {
   if (btnDelete) btnDelete.onclick = deleteGroup;
   
   const btnApplyName = document.getElementById("btnApplyGroupName");
-  if (btnApplyName) {
-    btnApplyName.onclick = () => {
-      if (!contextTarget || contextTarget.groupIndex == null) return;
+if (btnApplyName) {
+  btnApplyName.onclick = () => {
+    if (!contextTarget || contextTarget.groupIndex == null) return;
 
-      const gi = contextTarget.groupIndex;
-      const nameInp = document.getElementById("groupNameInput");
+    const gi = contextTarget.groupIndex;
+    const nameInp = document.getElementById("groupNameInput");
 
-      if (nameInp instanceof HTMLInputElement) {
-        const newName = nameInp.value.trim();
-        if (newName) {
-          groups[gi].name = newName;
+    if (nameInp instanceof HTMLInputElement) {
+      const newName = nameInp.value.trim();
+      if (newName) {
+        const oldName = groups[gi].name || "";
+        groups[gi].name = newName;
 
-          // Log group edit
-          addLogEntry(groups[gi].name,"group-edit", {
+        // Log group name change
+        if (oldName !== newName) {
+          addLogEntry(groups[gi].name, "group-edit", {
             groupIndex: gi,
-            name: newName
+            field: "name",
+            fromValue: oldName,
+            toValue: newName
           });
-          saveData();
-          render();
         }
+
+        saveData();
+        render();
       }
-    };
-  }
+    }
+  };
+}
 })();
 
   /* ===================== TEAM MODAL (OFFLINE) ===================== */
