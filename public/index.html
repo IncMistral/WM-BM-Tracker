@@ -857,10 +857,6 @@ const logsForDate = logs.filter(l => {
               case "milestone-edit":
               if (d.fromLabel && d.toLabel && d.fromLabel !== d.toLabel) {
                 detailText = "Name changed from " + d.fromLabel + " to " + d.toLabel;
-              } else if (d.fromDate && d.toDate && d.fromDate !== d.toDate) {
-                detailText = "Date changed from " + d.fromDate + " to " + d.toDate;
-              } else if (d.fromStatus && d.toStatus && d.fromStatus !== d.toStatus) {
-                detailText = "Status changed from " + d.fromStatus + " to " + d.toStatus;
               } else {
                 detailText = "Milestone edited: " + (d.toLabel || d.label || "");
               }
@@ -1790,28 +1786,49 @@ if (idx == null || idx === '') {
     });
 
 } else {
-  // --- Editing an existing milestone ---
-  const oldMs     = p.milestones[idx]; 
-  const oldLabel  = oldMs.label  || "";
-  const oldDate   = oldMs.date   || "";
-  const oldStatus = oldMs.status || "incomplete";
+    // --- Editing an existing milestone ---
+    const oldMs     = { ...p.milestones[idx] };
+    const oldLabel  = oldMs.label  || "";
+    const oldDate   = oldMs.date   || "";
+    const oldStatus = oldMs.status || "incomplete";
 
-  payload.status = oldMs.status || "incomplete";
-  p.milestones[idx] = payload;
+    payload.status = oldMs.status || "incomplete";
+    p.milestones[idx] = payload;
 
-  const savedMilestone = p.milestones[idx];
-  addLogEntry(g.name,"milestone-edit", {
-    groupIndex: gi,
-    projectIndex: pi,
-    milestoneIndex: idx,
-    fromLabel: oldLabel,
-    toLabel: savedMilestone.label || "",
-    fromDate: oldDate,
-    toDate: savedMilestone.date || "",
-    fromStatus: oldStatus,
-    toStatus: savedMilestone.status
-    });
-  }
+    const savedMilestone = p.milestones[idx];
+
+    if (oldLabel !== savedMilestone.label) {
+      addLogEntry(g.name, "milestone-edit", {
+        groupIndex: gi,
+        projectIndex: pi,
+        milestoneIndex: idx,
+        field: "label",
+        fromValue: oldLabel,
+        toValue: savedMilestone.label || ""
+      });
+    }
+
+    if (oldDate !== savedMilestone.date) {
+      addLogEntry(g.name, "milestone-edit", {
+        groupIndex: gi,
+        projectIndex: pi,
+        milestoneIndex: idx,
+        field: "date",
+        fromValue: oldDate,
+        toValue: savedMilestone.date || ""
+      });
+    }
+
+    if (oldStatus !== savedMilestone.status) {
+      addLogEntry(g.name, "milestone-edit", {
+        groupIndex: gi,
+        projectIndex: pi,
+        milestoneIndex: idx,
+        field: "status",
+        fromValue: oldStatus,
+        toValue: savedMilestone.status
+      });
+    }
 }
 
   compileDailyLogs();
@@ -1825,6 +1842,7 @@ if (idx == null || idx === '') {
     if (btnClose) btnClose.onclick = () => closeModal('milestoneModal');
 
     openModal('milestoneModal');
+  }
 
   /* ===================== PROJECT MODAL (OPEN/SAVE/DELETE) ===================== */
   function openProjectModal(gi, pi) {
