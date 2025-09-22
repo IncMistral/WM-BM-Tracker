@@ -404,14 +404,16 @@ async function showLogs() {
   let editingMemberIndex = null;
   let projectBarRegions = [];
   let currentUser = null;   // { username, role }
+
   // Restore currentUser from localStorage if available
 const savedUser = localStorage.getItem("bm-currentUser");
 if (savedUser) {
   try {
-    currentUser = JSON.parse(savedUser);
+    const parsed = JSON.parse(savedUser);
+    setCurrentUser(parsed); // ✅ Restore user AND update button to "Logout"
   } catch (e) {
     console.warn("Failed to parse saved user:", e);
-    currentUser = null;
+    setCurrentUser(null);
   }
 }
          
@@ -439,6 +441,23 @@ async function saveData() {
     console.warn("Save failed:", e);
   }
 }
+
+function setCurrentUser(user) {
+  currentUser = user;
+  const btnLogin = document.getElementById("btnLogin");
+  const btnEditUser = document.getElementById("btnEditUser");
+
+  if (user) {
+    localStorage.setItem("bm-currentUser", JSON.stringify(user));
+    if (btnLogin) btnLogin.textContent = "Logout";
+    if (btnEditUser) btnEditUser.style.display = (user.role === "admin") ? "inline-block" : "none";
+  } else {
+    localStorage.removeItem("bm-currentUser");
+    if (btnLogin) btnLogin.textContent = "Login";
+    if (btnEditUser) btnEditUser.style.display = "none";
+  }
+}
+
  
 async function loadFromServer() {
   try {
@@ -2366,39 +2385,30 @@ function handleLogin() {
     return;
   }
 
-  // ✅ Only after a valid login: set session
-  loggedInUser = found.username;
-  userRole     = found.role;
-  localStorage.setItem("loggedInUser", loggedInUser);
-  localStorage.setItem("userRole", userRole);
+// ✅ Set logged-in user context
+setCurrentUser({ username: found.username, role: found.role });
 
-  currentUser = { username: loggedInUser, role: userRole };
-  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
+// ✅ Force creation of today’s daily log bucket
+compileDailyLogs();
 
-  // ✅ Force creation of today’s daily log bucket right on login
-  compileDailyLogs();
-
-  // ✅ Log successful login
-  addLogEntry("", "login", { username: loggedInUser, role: userRole });
-
-
-  // Assign session values
-  loggedInUser = found.username;
-  userRole = found.role;
-
-  // Save session to localStorage
-  localStorage.setItem("loggedInUser", loggedInUser);
-  localStorage.setItem("userRole", userRole);
-  currentUser = { username: loggedInUser, role: userRole };
-  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
+// ✅ Log successful login
+addLogEntry("", "login", { username: found.username, role: found.role });
 
 
   // Update UI
-  const btnLogin = document.getElementById('btnLogin');
-  if (btnLogin) {
-    btnLogin.textContent = "Log out";
-    btnLogin.onclick = handleLogout;   // ✅ switch handler immediately
-  }
+const btnLogin = document.getElementById("btnLogin");
+if (btnLogin) {
+  btnLogin.onclick = () => {
+    if (currentUser) {
+      // Act as logout
+      setCurrentUser(null);
+      location.reload(); // Optional: or call render()
+    } else {
+      // Show login modal
+      openModal("loginModal");
+    }
+  };
+}
 
   const btnEditUser = document.getElementById('btnEditUser');
   if (btnEditUser) {
