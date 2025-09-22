@@ -1005,16 +1005,6 @@ const logsForDate = logs.filter(l => {
         };
 
         // ✅ Restore currentUser BEFORE DOM content loads or modals get triggered
-const savedUser = localStorage.getItem("bm-currentUser");
-if (savedUser) {
-  try {
-    const parsed = JSON.parse(savedUser);
-    setCurrentUser(parsed);
-  } catch (e) {
-    console.warn("Failed to parse saved user:", e);
-    setCurrentUser(null);
-  }
-}
         document.addEventListener("DOMContentLoaded", () => {
           refreshLogDropdown(groupName);
           console.log("✅ Dropdown initialized for", groupName);
@@ -2835,6 +2825,34 @@ const g = groups[gi];
 
   document.getElementById("trackerWrapper").style.display = "none";
   document.getElementById("reportPage").style.display = "block";
+
+  document.addEventListener("DOMContentLoaded", () => {
+  // ✅ Restore current user from localStorage
+  const savedUser = localStorage.getItem("bm-currentUser");
+  if (savedUser) {
+    try {
+      const parsed = JSON.parse(savedUser);
+      setCurrentUser(parsed);
+    } catch (e) {
+      console.warn("Failed to parse saved user:", e);
+      setCurrentUser(null);
+    }
+  }
+
+  // ✅ Wire login/logout button
+  const btnLogin = document.getElementById("btnLogin");
+  if (btnLogin) {
+    btnLogin.onclick = () => {
+      if (currentUser) {
+        setCurrentUser(null);
+        location.reload();
+      } else {
+        openModal("loginModal");
+      }
+    };
+  }
+});
+
 
 </script>
 
