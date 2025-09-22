@@ -862,10 +862,17 @@ const logsForDate = logs.filter(l => {
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
               case "milestone-edit":
-              if (d.fromLabel && d.toLabel && d.fromLabel !== d.toLabel) {
-                detailText = "Name changed from " + d.fromLabel + " to " + d.toLabel;
+              if (d.field === "label") {
+                detailText = "Name Changed From " + d.fromValue + " to " + d.toValue;
+              } else if (d.field === "date") {
+                detailText = "Date Changed From " + d.fromValue + " to " + d.toValue;
+              } else if (d.field === "status" || (d.from && d.to)) {
+                // Handle both the structured {field:"status"} form and the {from,to} form
+                const fromStatus = d.fromValue || d.from || "";
+                const toStatus   = d.toValue   || d.to   || "";
+                detailText = "Status Changed From " + fromStatus + " to " + toStatus;
               } else {
-                detailText = "Milestone edited: " + (d.toLabel || d.label || "");
+                detailText = "Milestone edited";
               }
               break;
               case "milestone-delete": detailText = "Milestone deleted: " + (d.label || ""); break;
