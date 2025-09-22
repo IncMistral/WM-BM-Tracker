@@ -404,19 +404,7 @@ async function showLogs() {
   let editingMemberIndex = null;
   let projectBarRegions = [];
   let currentUser = null;   // { username, role }
-
-  // Restore currentUser from localStorage if available
-const savedUser = localStorage.getItem("bm-currentUser");
-if (savedUser) {
-  try {
-    const parsed = JSON.parse(savedUser);
-    setCurrentUser(parsed); // ✅ Restore user AND update button to "Logout"
-  } catch (e) {
-    console.warn("Failed to parse saved user:", e);
-    setCurrentUser(null);
-  }
-}
-         
+       
   /* ===================== LIGHT DOM HELPERS ===================== */
   const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -1016,6 +1004,17 @@ const logsForDate = logs.filter(l => {
 
         };
 
+        // ✅ Restore currentUser BEFORE DOM content loads or modals get triggered
+const savedUser = localStorage.getItem("bm-currentUser");
+if (savedUser) {
+  try {
+    const parsed = JSON.parse(savedUser);
+    setCurrentUser(parsed);
+  } catch (e) {
+    console.warn("Failed to parse saved user:", e);
+    setCurrentUser(null);
+  }
+}
         document.addEventListener("DOMContentLoaded", () => {
           refreshLogDropdown(groupName);
           console.log("✅ Dropdown initialized for", groupName);
