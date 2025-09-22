@@ -2456,11 +2456,10 @@ window.addEventListener("load", () => {
     // Apply permissions immediately for restored session
     applyPermissions();
 
-    // 🔑 Force-hide overlay and login modal
+    // Hide login overlay/modal
     const overlay = document.getElementById("screenOverlay");
     if (overlay) overlay.style.display = "none";
-    const loginModal = document.getElementById("loginModal");
-    if (loginModal) loginModal.style.display = "none";
+    closeModal("loginModal");
 
     render();
   } else {
@@ -2471,25 +2470,6 @@ window.addEventListener("load", () => {
     openModal("loginModal");
   }
 });
-
-function applyPermissions() {
-  const restrictedButtons = ["btnNewGroup", "btnSave", "btnLoad", "btnEditUser"];
-  const isAdmin = (userRole === "admin");
-  const isLoggedOut = (!loggedInUser);
-
-  // Hide/disable top bar buttons unless admin
-  restrictedButtons.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (isAdmin) {
-      el.style.display = "inline-block";
-      el.disabled = false;
-    } else {
-      el.style.display = "none";   // completely hidden
-      el.disabled = true;          // extra safety
-    }
-  });
-}
 
 function applyPermissions() {
   const restrictedButtons = ["btnNewGroup", "btnSave", "btnLoad", "btnEditUser"];
