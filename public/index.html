@@ -436,16 +436,25 @@ function setCurrentUser(user) {
   const btnEditUser = document.getElementById("btnEditUser");
 
   if (user) {
-    localStorage.setItem("bm-currentUser", JSON.stringify(user));
+    // ✅ Save session user (survives refresh, clears on browser close)
+    sessionStorage.setItem("bm-currentUser", JSON.stringify(user));
+
     if (btnLogin) btnLogin.textContent = "Logout";
-    if (btnEditUser) btnEditUser.style.display = (user.role === "admin") ? "inline-block" : "none";
+    if (btnEditUser) {
+      btnEditUser.style.display = (user.role === "admin") ? "inline-block" : "none";
+    }
   } else {
-    localStorage.removeItem("bm-currentUser");
+    // ✅ Clear everything on explicit logout
+    sessionStorage.removeItem("bm-currentUser");
+    sessionStorage.removeItem("loggedInUser");
+    sessionStorage.removeItem("userRole");
+
     if (btnLogin) btnLogin.textContent = "Login";
-    if (btnEditUser) btnEditUser.style.display = "none";
+    if (btnEditUser) {
+      btnEditUser.style.display = "none";
+    }
   }
 }
-
  
 async function loadFromServer() {
   try {
@@ -464,8 +473,8 @@ async function loadFromServer() {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  // ✅ Restore current user from localStorage
-  const storedUser = localStorage.getItem("bm-currentUser");
+  // ✅ Restore current user from sessionStorage (survives refresh only)
+  const storedUser = sessionStorage.getItem("bm-currentUser");
   if (storedUser) {
     try {
       setCurrentUser(JSON.parse(storedUser));
