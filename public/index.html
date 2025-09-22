@@ -851,6 +851,13 @@ const logsForDate = logs.filter(l => {
               case "logout": detailText = "User " + (d.username || l.user) + " logged out"; break;
               case "group-create": detailText = "Group created: " + (d.name || ""); break;
               case "group-delete": detailText = "Group deleted: " + (d.name || ""); break;
+              case "group-edit":
+              if (d.field === "name") {
+                detailText = "Group Name Changed From " + d.fromValue + " to " + d.toValue;
+              } else {
+                detailText = "Group field " + d.field + " changed from " + d.fromValue + " to " + d.toValue;
+              }
+              break;
               case "project-create": detailText = "Project created: " + (d.name || ""); break;
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
