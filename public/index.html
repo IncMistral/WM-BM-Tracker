@@ -1422,7 +1422,7 @@ del.addEventListener("click", () => {
 
 function openGroupModal(gi) {
   // NEW: admin-only
-  if (userRole !== "admin") { return; }
+  if (!currentUser || currentUser.role !== "admin") { return; }
 
   contextTarget = { groupIndex: gi };
   const g = groups[gi];
