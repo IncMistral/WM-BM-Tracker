@@ -862,16 +862,17 @@ const logsForDate = logs.filter(l => {
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
               case "milestone-edit":
-              if (d.fromLabel && d.toLabel && d.fromLabel !== d.toLabel) {
-                detailText = "Name changed from " + d.fromLabel + " to " + d.toLabel;
-              } else if ((d.from && d.to) || (d.fromStatus && d.toStatus)) {
-                const fromStatus = d.fromStatus || d.from || "";
-                const toStatus   = d.toStatus   || d.to   || "";
-                detailText = "Status changed from " + fromStatus + " to " + toStatus;
+              if (d.field === "label" && d.fromValue && d.toValue && d.fromValue !== d.toValue) {
+                detailText = "Milestone Name Changed From " + d.fromValue + " to " + d.toValue;
+              } else if (d.field === "date" && d.fromValue !== d.toValue) {
+                detailText = "Milestone Date Changed From " + d.fromValue + " to " + d.toValue;
+              } else if (d.field === "status" && d.fromValue !== d.toValue) {
+                detailText = "Status Changed From " + d.fromValue + " to " + d.toValue;
               } else {
-                detailText = "Milestone edited: " + (d.toLabel || d.label || "");
+                detailText = "Milestone edited: " + (d.toValue || d.label || "");
               }
               break;
+
               case "milestone-delete": detailText = "Milestone deleted: " + (d.label || ""); break;
               default: detailText = JSON.stringify(d);
             }
