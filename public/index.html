@@ -414,6 +414,12 @@ if (savedUser) {
     currentUser = null;
   }
 }
+if (currentUser) {
+  document.getElementById("btnLogin").style.display = "none";
+  document.getElementById("btnEditUser").style.display =
+    currentUser.role === "admin" ? "inline-block" : "none";
+}
+
          
   /* ===================== LIGHT DOM HELPERS ===================== */
   const $  = (sel, root = document) => root.querySelector(sel);
@@ -2367,10 +2373,14 @@ function handleLogin() {
   }
 
   // ✅ Only after a valid login: set session
-  loggedInUser = found.username;
-  userRole     = found.role;
-  localStorage.setItem("loggedInUser", loggedInUser);
-  localStorage.setItem("userRole", userRole);
+  currentUser = { username: found.username, role: found.role };
+  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
+
+  // Update UI immediately
+  document.getElementById("btnLogin").style.display = "none";
+  document.getElementById("btnEditUser").style.display =
+  currentUser.role === "admin" ? "inline-block" : "none";
+
 
   currentUser = { username: loggedInUser, role: userRole };
   localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
