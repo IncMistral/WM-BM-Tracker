@@ -2456,10 +2456,11 @@ window.addEventListener("load", () => {
     // Apply permissions immediately for restored session
     applyPermissions();
 
-    // Hide login overlay/modal
+    // 🔑 Force-hide overlay and login modal
     const overlay = document.getElementById("screenOverlay");
     if (overlay) overlay.style.display = "none";
-    closeModal("loginModal");
+    const loginModal = document.getElementById("loginModal");
+    if (loginModal) loginModal.style.display = "none";
 
     render();
   } else {
