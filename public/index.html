@@ -1609,9 +1609,35 @@ render();
       if (!name) { alert('Enter a name.'); return; }
 
       if (editingMemberIndex != null) {
-        g.teamMembers[editingMemberIndex] = { role, name };
-        editingMemberIndex = null;
-      }
+  const oldMember = { ...g.teamMembers[editingMemberIndex] };
+
+  g.teamMembers[editingMemberIndex] = { role, name };
+
+  // Log role change separately
+  if (oldMember.role !== role) {
+    addLogEntry(g.name, "team-edit", {
+      groupIndex: gi,
+      teamIndex: editingMemberIndex,
+      field: "role",
+      fromValue: oldMember.role,
+      toValue: role
+    });
+  }
+
+  // Log name change separately
+  if (oldMember.name !== name) {
+    addLogEntry(g.name, "team-edit", {
+      groupIndex: gi,
+      teamIndex: editingMemberIndex,
+      field: "name",
+      fromValue: oldMember.name,
+      toValue: name
+    });
+  }
+
+  editingMemberIndex = null;
+}
+
 
       saveData();
       roleInp.value = '';
