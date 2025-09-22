@@ -414,6 +414,9 @@ if (savedUser) {
     currentUser = null;
   }
 }
+function isAdmin() {
+  return currentUser && currentUser.role === "admin";
+}
 if (currentUser) {
   document.getElementById("btnLogin").style.display = "none";
   document.getElementById("btnEditUser").style.display =
@@ -2389,15 +2392,9 @@ function handleLogin() {
   addLogEntry("", "login", { username: loggedInUser, role: userRole });
 
 
-  // Assign session values
-  loggedInUser = found.username;
-  userRole = found.role;
-
-  // Save session to localStorage
-  localStorage.setItem("loggedInUser", loggedInUser);
-  localStorage.setItem("userRole", userRole);
-  currentUser = { username: loggedInUser, role: userRole };
-  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
+// Assign and persist session
+currentUser = { username: found.username, role: found.role };
+localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
 
   // Update UI
@@ -2514,11 +2511,9 @@ function wireLoginSystem() {
 
   if (btnLogin) {
     btnLogin.onclick = () => {
-      if (loggedInUser) {
+      if (currentUser) {
         handleLogout();
       } else {
-
-      // explicitly open login modal
         openModal('loginModal');
       }
     };
