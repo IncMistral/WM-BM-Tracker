@@ -1748,56 +1748,60 @@ toggle.addEventListener('click', () => {
     const btnDel   = document.getElementById('btnMsDelete');
 
     if (btnSave) {
-  btnSave.onclick = () => {
-    const label = (nameInp instanceof HTMLInputElement) ? nameInp.value.trim() : '';
-    const s     = (startInp instanceof HTMLInputElement) ? startInp.value : '';
+      
+btnSave.onclick = () => {
+  const label = (nameInp instanceof HTMLInputElement) ? nameInp.value.trim() : '';
+  const s     = (startInp instanceof HTMLInputElement) ? startInp.value : '';
 
-    const payload = {
-      label,
-      date: s,
-      startDate: s
-    };
-
-    if (!Array.isArray(p.milestones)) p.milestones = [];
-
-    let idx = contextTarget.milestoneIndex;
-if (idx == null || idx === '') {
-  // --- New milestone ---
-  p.milestones.push(payload);
-  idx = p.milestones.length - 1;
-  const newMs = p.milestones[idx];
-
-  addLogEntry(g.name, "milestone-add", {
-    groupIndex: gi,
-    projectIndex: pi,
-    milestoneIndex: idx,
-    label: newMs.label || "",
-    date: newMs.date || "",
-    status: newMs.status || "incomplete"
-  });
-} else {
-  // --- Editing an existing milestone ---
-  p.milestones[idx] = payload;
-
-  const savedMilestone = p.milestones[idx];
-  addLogEntry(g.name,"milestone-edit", {
-    groupIndex: gi,
-    projectIndex: pi,
-    milestoneIndex: idx,
-    label: savedMilestone.label,
-    status: savedMilestone.status,
-    date: savedMilestone.date
-  });
-}
-
-
-compileDailyLogs();
-saveData();
-renderMilestoneList(gi, pi);
-render();
-closeModal('milestoneModal');
+  const payload = {
+    label,
+    date: s,
+    startDate: s
   };
-}
+
+  if (!Array.isArray(p.milestones)) p.milestones = [];
+
+  let idx = contextTarget.milestoneIndex;
+  if (idx == null || idx === '') {
+    // --- New milestone ---
+    payload.status = "incomplete"; // default for new
+    p.milestones.push(payload);
+    idx = p.milestones.length - 1;
+
+    const newMs = p.milestones[idx];
+    addLogEntry(g.name, "milestone-add", {
+      groupIndex: gi,
+      projectIndex: pi,
+      milestoneIndex: idx,
+      label: newMs.label || "",
+      date: newMs.date || "",
+      status: newMs.status || "incomplete"
+    });
+  } else {
+    // --- Editing an existing milestone ---
+    // preserve old status if it exists
+    payload.status = p.milestones[idx].status || "incomplete";
+    p.milestones[idx] = payload;
+
+    const savedMilestone = p.milestones[idx];
+    addLogEntry(g.name, "milestone-edit", {
+      groupIndex: gi,
+      projectIndex: pi,
+      milestoneIndex: idx,
+      label: savedMilestone.label,
+      status: savedMilestone.status,
+      date: savedMilestone.date
+    });
+  }
+
+
+  compileDailyLogs();
+  saveData();
+  renderMilestoneList(gi, pi);
+  render();
+  closeModal('milestoneModal');
+};
+    }
 
     if (btnClose) btnClose.onclick = () => closeModal('milestoneModal');
 
