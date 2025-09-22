@@ -854,7 +854,14 @@ const logsForDate = logs.filter(l => {
               case "project-create": detailText = "Project created: " + (d.name || ""); break;
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
-              case "milestone-edit": detailText = "Milestone edited: " + (d.label || ""); break;
+              case "milestone-edit":
+              case "milestone-edit":
+              if (d.fromLabel && d.toLabel && d.fromLabel !== d.toLabel) {
+                detailText = "Name changed from " + d.fromLabel + " to " + d.toLabel;
+              } else {
+                detailText = "Milestone edited: " + (d.toLabel || d.label || "");
+              }
+              break;
               case "milestone-delete": detailText = "Milestone deleted: " + (d.label || ""); break;
               default: detailText = JSON.stringify(d);
             }
