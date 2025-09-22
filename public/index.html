@@ -2440,13 +2440,36 @@ function handleLogin() {
   if (userInp) userInp.value = "";
   if (passInp) passInp.value = "";
 
-  // NEW: re-apply non-admin/user permissions immediately
-  applyPermissions();
+// ✅ Restore login state on refresh
+window.addEventListener("load", () => {
+  const savedUser = localStorage.getItem("loggedInUser");
+  const savedRole = localStorage.getItem("userRole");
+  const savedCurrentUser = localStorage.getItem("bm-currentUser");
 
-  const overlay = document.getElementById("screenOverlay");
-  if (overlay) overlay.style.display = "block";
-  openModal("loginModal");
-}
+  if (savedUser && savedRole) {
+    loggedInUser = savedUser;
+    userRole = savedRole;
+    currentUser = savedCurrentUser
+      ? JSON.parse(savedCurrentUser)
+      : { username: savedUser, role: savedRole };
+
+    // Apply permissions immediately for restored session
+    applyPermissions();
+
+    // Hide login overlay/modal
+    const overlay = document.getElementById("screenOverlay");
+    if (overlay) overlay.style.display = "none";
+    closeModal("loginModal");
+
+    render();
+  } else {
+    // No saved session, show login modal
+    applyPermissions();
+    const overlay = document.getElementById("screenOverlay");
+    if (overlay) overlay.style.display = "block";
+    openModal("loginModal");
+  }
+});
 
 function applyPermissions() {
   const restrictedButtons = ["btnNewGroup", "btnSave", "btnLoad", "btnEditUser"];
@@ -2465,6 +2488,7 @@ function applyPermissions() {
       el.disabled = true;          // extra safety
     }
   });
+}
 
 // Disable all modal controls unless admin
 const modals = ["groupModal", "projectModal", "milestoneModal", "teamModal", "editUserModal"];
