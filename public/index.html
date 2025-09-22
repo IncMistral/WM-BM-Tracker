@@ -404,7 +404,17 @@ async function showLogs() {
   let editingMemberIndex = null;
   let projectBarRegions = [];
   let currentUser = null;   // { username, role }
-       
+  // Restore currentUser from localStorage if available
+const savedUser = localStorage.getItem("bm-currentUser");
+if (savedUser) {
+  try {
+    currentUser = JSON.parse(savedUser);
+  } catch (e) {
+    console.warn("Failed to parse saved user:", e);
+    currentUser = null;
+  }
+}
+         
   /* ===================== LIGHT DOM HELPERS ===================== */
   const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -429,32 +439,6 @@ async function saveData() {
     console.warn("Save failed:", e);
   }
 }
-
-function setCurrentUser(user) {
-  currentUser = user;
-  const btnLogin = document.getElementById("btnLogin");
-  const btnEditUser = document.getElementById("btnEditUser");
-
-  if (user) {
-    // ✅ Save session user (survives refresh, clears on browser close)
-    sessionStorage.setItem("bm-currentUser", JSON.stringify(user));
-
-    if (btnLogin) btnLogin.textContent = "Logout";
-    if (btnEditUser) {
-      btnEditUser.style.display = (user.role === "admin") ? "inline-block" : "none";
-    }
-  } else {
-    // ✅ Clear everything on explicit logout
-    sessionStorage.removeItem("bm-currentUser");
-    sessionStorage.removeItem("loggedInUser");
-    sessionStorage.removeItem("userRole");
-
-    if (btnLogin) btnLogin.textContent = "Login";
-    if (btnEditUser) {
-      btnEditUser.style.display = "none";
-    }
-  }
-}
  
 async function loadFromServer() {
   try {
@@ -472,23 +456,15 @@ async function loadFromServer() {
   return false;
 }
 
-window.addEventListener("DOMContentLoaded", async () => {
-  // ✅ Restore current user from sessionStorage (survives refresh only)
-  const storedUser = sessionStorage.getItem("bm-currentUser");
-  if (storedUser) {
-    try {
-      setCurrentUser(JSON.parse(storedUser));
-    } catch (e) {
-      console.warn("Failed to restore user:", e);
-    }
-  }
 
+window.addEventListener("DOMContentLoaded", async () => {
   const loaded = await loadFromServer();
   if (!loaded) {
     groups = [];
   }
   render();
 });
+
 
   /* ===================== DATE / TIMELINE ===================== */
   function parseLocalDate(yyyy_mm_dd) {
@@ -1021,7 +997,6 @@ const logsForDate = logs.filter(l => {
 
         };
 
-        // ✅ Restore currentUser BEFORE DOM content loads or modals get triggered
         document.addEventListener("DOMContentLoaded", () => {
           refreshLogDropdown(groupName);
           console.log("✅ Dropdown initialized for", groupName);
@@ -1441,7 +1416,7 @@ del.addEventListener("click", () => {
 
 function openGroupModal(gi) {
   // NEW: admin-only
-  if (currentUser?.role !== "admin") { return; }
+  if (userRole !== "admin") { return; }
 
   contextTarget = { groupIndex: gi };
   const g = groups[gi];
@@ -2232,6 +2207,8 @@ function wireToolbar() {
       newGroup();
     };
   }
+
+  // You can still wire up save/load/fileInput below if needed
 }
 
 
@@ -2249,7 +2226,14 @@ function wireToolbar() {
   render();
   });
 
-
+  // Force logout when window/tab is closed or refreshed
+  const clearSessionOnExit = () => {
+    try {
+      localStorage.removeItem("bm-currentUser"); // actual saved user
+      localStorage.removeItem("loggedInUser");
+      localStorage.removeItem("userRole");
+    } catch (_) {}
+  };
   window.addEventListener("pagehide", clearSessionOnExit, { capture: true });
   window.addEventListener("beforeunload", clearSessionOnExit, { capture: true });
 
@@ -2382,30 +2366,39 @@ function handleLogin() {
     return;
   }
 
-// ✅ Set logged-in user context
-setCurrentUser({ username: found.username, role: found.role });
+  // ✅ Only after a valid login: set session
+  loggedInUser = found.username;
+  userRole     = found.role;
+  localStorage.setItem("loggedInUser", loggedInUser);
+  localStorage.setItem("userRole", userRole);
 
-// ✅ Force creation of today’s daily log bucket
-compileDailyLogs();
+  currentUser = { username: loggedInUser, role: userRole };
+  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
-// ✅ Log successful login
-addLogEntry("", "login", { username: found.username, role: found.role });
+  // ✅ Force creation of today’s daily log bucket right on login
+  compileDailyLogs();
+
+  // ✅ Log successful login
+  addLogEntry("", "login", { username: loggedInUser, role: userRole });
+
+
+  // Assign session values
+  loggedInUser = found.username;
+  userRole = found.role;
+
+  // Save session to localStorage
+  localStorage.setItem("loggedInUser", loggedInUser);
+  localStorage.setItem("userRole", userRole);
+  currentUser = { username: loggedInUser, role: userRole };
+  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
 
   // Update UI
-const btnLogin = document.getElementById("btnLogin");
-if (btnLogin) {
-  btnLogin.onclick = () => {
-    if (currentUser) {
-      // Act as logout
-      setCurrentUser(null);
-      location.reload(); // Optional: or call render()
-    } else {
-      // Show login modal
-      openModal("loginModal");
-    }
-  };
-}
+  const btnLogin = document.getElementById('btnLogin');
+  if (btnLogin) {
+    btnLogin.textContent = "Log out";
+    btnLogin.onclick = handleLogout;   // ✅ switch handler immediately
+  }
 
   const btnEditUser = document.getElementById('btnEditUser');
   if (btnEditUser) {
@@ -2834,43 +2827,6 @@ const g = groups[gi];
   document.getElementById("trackerWrapper").style.display = "none";
   document.getElementById("reportPage").style.display = "block";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  // ✅ 1. Restore session if user was previously logged in
-  const savedUser = sessionStorage.getItem("bm-currentUser");
-  if (savedUser) {
-    try {
-      const parsed = JSON.parse(savedUser);
-      setCurrentUser(parsed);
-    } catch (e) {
-      console.warn("Could not restore saved user:", e);
-      setCurrentUser(null);
-    }
-  }
-
-  // ✅ 2. Wire up Login/Logout button
-  const btnLogin = document.getElementById("btnLogin");
-  if (btnLogin) {
-    btnLogin.addEventListener("click", () => {
-      if (currentUser) {
-        // Logout
-        addLogEntry(currentUser.username, "logout", { username: currentUser.username });
-        setCurrentUser(null);
-        render();
-      } else {
-        // Show login modal
-        openModal("loginModal");
-      }
-    });
-  }
-
-  // ✅ 3. Load groups/logs from server
-  const loaded = await loadFromServer();
-  if (!loaded) {
-    groups = [];
-  }
-  render();
-});
-
 </script>
 
 <div id="reportPage" style="display:none; padding:20px;">
@@ -2880,4 +2836,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 </div>
 </body>
 </html>
-
