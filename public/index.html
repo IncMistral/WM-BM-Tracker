@@ -872,7 +872,9 @@ const logsForDate = logs.filter(l => {
                 detailText = "Milestone edited: " + (d.toValue || d.label || "");
               }
               break;
-
+              case "milestone-status-change":
+              detailText = "Milestone Status Changed From " + (d.from || "") + " to " + (d.to || "");
+              break;
               case "milestone-delete": detailText = "Milestone deleted: " + (d.label || ""); break;
               default: detailText = JSON.stringify(d);
             }
