@@ -869,6 +869,15 @@ const logsForDate = logs.filter(l => {
               break;
               case "project-create": detailText = "Project created: " + (d.name || ""); break;
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
+              case "project-edit":
+              if (d.field === "startDate") {
+                detailText = "Project Start Date Changed From " + d.fromValue + " to " + d.toValue;
+              } else if (d.field === "completionDate") {
+                detailText = "Project End Date Changed From " + d.fromValue + " to " + d.toValue;
+              } else {
+                detailText = "Project edited: " + (d.toValue || d.name || "");
+              }
+              break;
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
               case "milestone-edit":
               if (d.field === "label" && d.fromValue && d.toValue && d.fromValue !== d.toValue) {
