@@ -463,15 +463,23 @@ async function loadFromServer() {
   return false;
 }
 
-
 window.addEventListener("DOMContentLoaded", async () => {
+  // ✅ Restore current user from localStorage
+  const storedUser = localStorage.getItem("bm-currentUser");
+  if (storedUser) {
+    try {
+      setCurrentUser(JSON.parse(storedUser));
+    } catch (e) {
+      console.warn("Failed to restore user:", e);
+    }
+  }
+
   const loaded = await loadFromServer();
   if (!loaded) {
     groups = [];
   }
   render();
 });
-
 
   /* ===================== DATE / TIMELINE ===================== */
   function parseLocalDate(yyyy_mm_dd) {
