@@ -1432,7 +1432,7 @@ del.addEventListener("click", () => {
 
 function openGroupModal(gi) {
   // NEW: admin-only
-  if (userRole !== "admin") { return; }
+  if (currentUser?.role !== "admin") { return; }
 
   contextTarget = { groupIndex: gi };
   const g = groups[gi];
@@ -2242,14 +2242,7 @@ function wireToolbar() {
   render();
   });
 
-  // Force logout when window/tab is closed or refreshed
-  const clearSessionOnExit = () => {
-    try {
-      localStorage.removeItem("bm-currentUser"); // actual saved user
-      localStorage.removeItem("loggedInUser");
-      localStorage.removeItem("userRole");
-    } catch (_) {}
-  };
+
   window.addEventListener("pagehide", clearSessionOnExit, { capture: true });
   window.addEventListener("beforeunload", clearSessionOnExit, { capture: true });
 
