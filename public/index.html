@@ -2406,7 +2406,7 @@ localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
   const btnEditUser = document.getElementById('btnEditUser');
   if (btnEditUser) {
-    btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
+    btnEditUser.style.display = isAdmin() ? "inline-block" : "none";
   }
 
   applyPermissions();
@@ -2479,13 +2479,13 @@ modals.forEach(id => {
   const buttons = modal.querySelectorAll("button");
   buttons.forEach(btn => {
     if (btn.id !== "btnLogin" && btn.id !== "btnLoginSubmit" && btn.id !== "btnLoginCancel") {
-      btn.disabled = !isAdmin;   // <--- only disable if not admin
+      btn.disabled = !isAdmin();
     }
   });
 
   const inputs = modal.querySelectorAll("input, select, textarea");
   inputs.forEach(inp => {
-    inp.disabled = !isAdmin;     // <--- only disable if not admin
+    inp.disabled = !isAdmin();
   });
 });
 
@@ -2659,7 +2659,7 @@ function addUser() {
 
     const btnEditUser = document.getElementById('btnEditUser');
     if (btnEditUser) {
-      btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
+      btnEditUser.style.display = isAdmin() ? "inline-block" : "none";
     }
 
     applyPermissions();
