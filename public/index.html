@@ -414,9 +414,6 @@ if (savedUser) {
     currentUser = null;
   }
 }
-function isAdmin() {
-  return currentUser && currentUser.role === "admin";
-}
 if (currentUser) {
   document.getElementById("btnLogin").style.display = "none";
   document.getElementById("btnEditUser").style.display =
@@ -2372,34 +2369,54 @@ function handleLogin() {
     return;
   }
 
-// ✅ Only after a valid login: set session
-currentUser = { username: found.username, role: found.role };
-localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
+  // ✅ Only after a valid login: set session
+  currentUser = { username: found.username, role: found.role };
+  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
-// ✅ Force creation of today’s daily log bucket right on login
-compileDailyLogs();
+  // Update UI immediately
+  document.getElementById("btnLogin").style.display = "none";
+  document.getElementById("btnEditUser").style.display =
+  currentUser.role === "admin" ? "inline-block" : "none";
 
-// ✅ Log successful login
-addLogEntry("", "login", { username: currentUser.username, role: currentUser.role });
 
-// ✅ Update UI immediately
-const btnLogin = document.getElementById("btnLogin");
-if (btnLogin) {
-  btnLogin.textContent = "Log out";
-  btnLogin.onclick = handleLogout;   // switch handler immediately
-}
+  currentUser = { username: loggedInUser, role: userRole };
+  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
-const btnEditUser = document.getElementById("btnEditUser");
-if (btnEditUser) {
-  btnEditUser.style.display = isAdmin() ? "inline-block" : "none";
-}
+  // ✅ Force creation of today’s daily log bucket right on login
+  compileDailyLogs();
 
-applyPermissions();
-render();   // refresh UI instantly
+  // ✅ Log successful login
+  addLogEntry("", "login", { username: loggedInUser, role: userRole });
 
-// ✅ Close modal + overlay after successful login
-closeModal("loginModal");
-document.getElementById("screenOverlay").style.display = "none";
+
+  // Assign session values
+  loggedInUser = found.username;
+  userRole = found.role;
+
+  // Save session to localStorage
+  localStorage.setItem("loggedInUser", loggedInUser);
+  localStorage.setItem("userRole", userRole);
+  currentUser = { username: loggedInUser, role: userRole };
+  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
+
+
+  // Update UI
+  const btnLogin = document.getElementById('btnLogin');
+  if (btnLogin) {
+    btnLogin.textContent = "Log out";
+    btnLogin.onclick = handleLogout;   // ✅ switch handler immediately
+  }
+
+  const btnEditUser = document.getElementById('btnEditUser');
+  if (btnEditUser) {
+    btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
+  }
+
+  applyPermissions();
+  render();                             // ✅ refresh UI instantly
+
+  document.getElementById("screenOverlay").style.display = "none";
+  closeModal('loginModal');
 }
 
   function handleLogout() {
@@ -2465,13 +2482,13 @@ modals.forEach(id => {
   const buttons = modal.querySelectorAll("button");
   buttons.forEach(btn => {
     if (btn.id !== "btnLogin" && btn.id !== "btnLoginSubmit" && btn.id !== "btnLoginCancel") {
-      btn.disabled = !isAdmin();
+      btn.disabled = !isAdmin;   // <--- only disable if not admin
     }
   });
 
   const inputs = modal.querySelectorAll("input, select, textarea");
   inputs.forEach(inp => {
-    inp.disabled = !isAdmin();
+    inp.disabled = !isAdmin;     // <--- only disable if not admin
   });
 });
 
@@ -2497,9 +2514,11 @@ function wireLoginSystem() {
 
   if (btnLogin) {
     btnLogin.onclick = () => {
-      if (currentUser) {
+      if (loggedInUser) {
         handleLogout();
       } else {
+
+      // explicitly open login modal
         openModal('loginModal');
       }
     };
@@ -2645,7 +2664,7 @@ function addUser() {
 
     const btnEditUser = document.getElementById('btnEditUser');
     if (btnEditUser) {
-      btnEditUser.style.display = isAdmin() ? "inline-block" : "none";
+      btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
     }
 
     applyPermissions();
