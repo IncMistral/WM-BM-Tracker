@@ -857,6 +857,10 @@ const logsForDate = logs.filter(l => {
               case "milestone-edit":
               if (d.fromLabel && d.toLabel && d.fromLabel !== d.toLabel) {
                 detailText = "Name changed from " + d.fromLabel + " to " + d.toLabel;
+              } else if (d.fromDate && d.toDate && d.fromDate !== d.toDate) {
+                detailText = "Date changed from " + d.fromDate + " to " + d.toDate;
+              } else if (d.fromStatus && d.toStatus && d.fromStatus !== d.toStatus) {
+                detailText = "Status changed from " + d.fromStatus + " to " + d.toStatus;
               } else {
                 detailText = "Milestone edited: " + (d.toLabel || d.label || "");
               }
@@ -1768,7 +1772,8 @@ btnSave.onclick = () => {
   if (!Array.isArray(p.milestones)) p.milestones = [];
 
   let idx = contextTarget.milestoneIndex;
-  if (idx == null || idx === '') {
+  
+if (idx == null || idx === '') {
     // --- New milestone ---
     payload.status = "incomplete"; // default for new
     p.milestones.push(payload);
@@ -1784,7 +1789,7 @@ btnSave.onclick = () => {
       status: newMs.status || "incomplete"
     });
 
-    } else {
+} else {
   // --- Editing an existing milestone ---
   const oldMs     = p.milestones[idx]; 
   const oldLabel  = oldMs.label  || "";
@@ -1807,6 +1812,30 @@ btnSave.onclick = () => {
     toStatus: savedMilestone.status
   });
 }
+
+    if (oldDate !== savedMilestone.date) {
+      addLogEntry(g.name, "milestone-edit", {
+        groupIndex: gi,
+        projectIndex: pi,
+        milestoneIndex: idx,
+        field: "date",
+        fromValue: oldDate,
+        toValue: savedMilestone.date || ""
+      });
+    }
+
+    if (oldStatus !== savedMilestone.status) {
+      addLogEntry(g.name, "milestone-edit", {
+        groupIndex: gi,
+        projectIndex: pi,
+        milestoneIndex: idx,
+        field: "status",
+        fromValue: oldStatus,
+        toValue: savedMilestone.status
+      });
+    }
+}
+
   compileDailyLogs();
   saveData();
   renderMilestoneList(gi, pi);
@@ -1818,7 +1847,6 @@ btnSave.onclick = () => {
     if (btnClose) btnClose.onclick = () => closeModal('milestoneModal');
 
     openModal('milestoneModal');
-  }
 
   /* ===================== PROJECT MODAL (OPEN/SAVE/DELETE) ===================== */
   function openProjectModal(gi, pi) {
