@@ -2491,6 +2491,25 @@ function applyPermissions() {
   });
 }
 
+function applyPermissions() {
+  const restrictedButtons = ["btnNewGroup", "btnSave", "btnLoad", "btnEditUser"];
+  const isAdmin = (userRole === "admin");
+  const isLoggedOut = (!loggedInUser);
+
+  // Hide/disable top bar buttons unless admin
+  restrictedButtons.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isAdmin) {
+      el.style.display = "inline-block";
+      el.disabled = false;
+    } else {
+      el.style.display = "none";   // completely hidden
+      el.disabled = true;          // extra safety
+    }
+  });
+}
+
 // Disable all modal controls unless admin
 const modals = ["groupModal", "projectModal", "milestoneModal", "teamModal", "editUserModal"];
 modals.forEach(id => {
