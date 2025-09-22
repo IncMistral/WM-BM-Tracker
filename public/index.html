@@ -858,6 +858,15 @@ const logsForDate = logs.filter(l => {
                 detailText = "Group field " + d.field + " changed from " + d.fromValue + " to " + d.toValue;
               }
               break;
+              case "team-edit":
+              if (d.field === "role") {
+                detailText = "Team Role Changed From " + d.fromValue + " to " + d.toValue;
+              } else if (d.field === "name") {
+                detailText = "Team Member Name Changed From " + d.fromValue + " to " + d.toValue;
+              } else {
+                detailText = "Team edited";
+              }
+              break;
               case "project-create": detailText = "Project created: " + (d.name || ""); break;
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
