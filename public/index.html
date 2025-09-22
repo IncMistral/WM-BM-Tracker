@@ -2372,48 +2372,34 @@ function handleLogin() {
     return;
   }
 
-  // ✅ Only after a valid login: set session
-  currentUser = { username: found.username, role: found.role };
-  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
-
-  // Update UI immediately
-  document.getElementById("btnLogin").style.display = "none";
-  document.getElementById("btnEditUser").style.display =
-  currentUser.role === "admin" ? "inline-block" : "none";
-
-
-  currentUser = { username: loggedInUser, role: userRole };
-  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
-
-  // ✅ Force creation of today’s daily log bucket right on login
-  compileDailyLogs();
-
-  // ✅ Log successful login
-  addLogEntry("", "login", { username: loggedInUser, role: userRole });
-
-
-// Assign and persist session
+// ✅ Only after a valid login: set session
 currentUser = { username: found.username, role: found.role };
 localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
+// ✅ Force creation of today’s daily log bucket right on login
+compileDailyLogs();
 
-  // Update UI
-  const btnLogin = document.getElementById('btnLogin');
-  if (btnLogin) {
-    btnLogin.textContent = "Log out";
-    btnLogin.onclick = handleLogout;   // ✅ switch handler immediately
-  }
+// ✅ Log successful login
+addLogEntry("", "login", { username: currentUser.username, role: currentUser.role });
 
-  const btnEditUser = document.getElementById('btnEditUser');
-  if (btnEditUser) {
-    btnEditUser.style.display = isAdmin() ? "inline-block" : "none";
-  }
+// ✅ Update UI immediately
+const btnLogin = document.getElementById("btnLogin");
+if (btnLogin) {
+  btnLogin.textContent = "Log out";
+  btnLogin.onclick = handleLogout;   // switch handler immediately
+}
 
-  applyPermissions();
-  render();                             // ✅ refresh UI instantly
+const btnEditUser = document.getElementById("btnEditUser");
+if (btnEditUser) {
+  btnEditUser.style.display = isAdmin() ? "inline-block" : "none";
+}
 
-  document.getElementById("screenOverlay").style.display = "none";
-  closeModal('loginModal');
+applyPermissions();
+render();   // refresh UI instantly
+
+// ✅ Close modal + overlay after successful login
+closeModal("loginModal");
+document.getElementById("screenOverlay").style.display = "none";
 }
 
   function handleLogout() {
