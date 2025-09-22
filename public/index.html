@@ -1810,30 +1810,8 @@ if (idx == null || idx === '') {
     toDate: savedMilestone.date || "",
     fromStatus: oldStatus,
     toStatus: savedMilestone.status
-  });
-}
-
-    if (oldDate !== savedMilestone.date) {
-      addLogEntry(g.name, "milestone-edit", {
-        groupIndex: gi,
-        projectIndex: pi,
-        milestoneIndex: idx,
-        field: "date",
-        fromValue: oldDate,
-        toValue: savedMilestone.date || ""
-      });
-    }
-
-    if (oldStatus !== savedMilestone.status) {
-      addLogEntry(g.name, "milestone-edit", {
-        groupIndex: gi,
-        projectIndex: pi,
-        milestoneIndex: idx,
-        field: "status",
-        fromValue: oldStatus,
-        toValue: savedMilestone.status
-      });
-    }
+    });
+  }
 }
 
   compileDailyLogs();
