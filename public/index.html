@@ -528,28 +528,6 @@ function addLogEntry(groupName, type, details) {
     .catch(err => console.error("Failed to save log:", err));
 }
 
-// Auto-refresh every 5 minutes for all users when logged in
-let autoRefreshInterval = null;
-
-function startAutoRefresh() {
-  // Clear any existing interval first
-  if (autoRefreshInterval) {
-    clearInterval(autoRefreshInterval);
-  }
-  
-  // Start new 5-minute refresh timer
-  autoRefreshInterval = setInterval(() => {
-    window.location.reload();
-  }, 300000); // 300000ms =  5 minutes
-}
-
-function stopAutoRefresh() {
-  if (autoRefreshInterval) {
-    clearInterval(autoRefreshInterval);
-    autoRefreshInterval = null;
-  }
-}
-
 /* ===================== DAILY LOG COMPILER ===================== */
 function compileDailyLogs() {
   if (!logs.length) return;
