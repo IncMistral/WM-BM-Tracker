@@ -67,10 +67,12 @@
       font-size: 16px; /* root for rems */
     }
     #topBar{
-      display:flex; align-items:center; gap:0.75rem; padding:0.625rem 0.875rem;
-      background: linear-gradient(180deg, #2a2a2a, #232323);
-      border-bottom:1px solid var(--border);
-    }
+  display:flex; align-items:center; gap:0.75rem; 
+  padding:0.625rem var(--tv-safe-margin);
+  background: linear-gradient(180deg, #2a2a2a, #232323);
+  border-bottom:1px solid var(--border);
+  box-sizing: border-box;
+}
     #topBar .logo { height:2rem; width:auto; object-fit:contain; display:block; }
     #trackerWrapper { 
   flex:1; position:relative; background:#1e1e1e; overflow:auto; min-height:50rem;
@@ -83,7 +85,7 @@
       flex:1;  /* pushes the Login button to the far right */
     }
 
-    
+  
     /* Controls */
     button{
       margin:0.3125rem; padding:0.5rem 0.875rem;
@@ -191,12 +193,12 @@
 
     /* Group background card */
     .group-card{
-      position:absolute; left:1rem;
-      background:#2b2b2b; border:1px solid var(--border); border-radius: var(--radius-md);
-      box-shadow: var(--shadow-2);
-      pointer-events:none;
-      transition:box-shadow .12s ease, transform .12s ease, background .12s ease;
-    }
+  position:absolute; left:var(--tv-safe-margin);
+  background:#2b2b2b; border:1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  pointer-events:none;
+  transition:box-shadow .12s ease, transform .12s ease, background .12s ease;
+}
     .group-card.is-hovered{ background:#313131; box-shadow: 0 12px 24px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,0.12) inset; transform:translateY(-1px); }
 
     /* Clickable labels */
@@ -741,14 +743,7 @@ function render() {
     const barXBase = sidePad + labelColWidth + labelGutter;
 
     // group background card (aligned to sidePad)
-    const groupStartY = y - 45;
-    const card = document.createElement('div');
-    card.className = 'group-card';
-    card.style.left   = sidePad + 'px';
-    card.style.top    = groupStartY + 'px';
-    card.style.width  = (wrapper.clientWidth - sidePad * 2) + 'px';
-    card.style.height = '1px';
-    wrapper.appendChild(card);
+card.style.width = (wrapper.clientWidth - sidePad * 2 - tvPadding) + 'px';
 
     // team ribbon (unchanged)
     const teamContainer = document.createElement("div");
