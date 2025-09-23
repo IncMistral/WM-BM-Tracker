@@ -458,13 +458,25 @@ async function loadFromServer() {
 
 
 window.addEventListener("DOMContentLoaded", async () => {
+  // Load groups and logs
   const loaded = await loadFromServer();
   if (!loaded) {
     groups = [];
   }
+  
+  // Load users from server
+  const usersLoaded = await loadUsers();
+  if (!usersLoaded) {
+    // Use defaults if server has no users
+    users = [
+      { username: "admin", password: "admin123", role: "admin" },
+      { username: "user", password: "user123", role: "user" }
+    ];
+    await saveUsers(); // Save defaults to server
+  }
+  
   render();
 });
-
 
   /* ===================== DATE / TIMELINE ===================== */
   function parseLocalDate(yyyy_mm_dd) {
@@ -2360,14 +2372,45 @@ for (let i = 0; i < projectBarRegions.length; i++) {
 let loggedInUser = localStorage.getItem("loggedInUser");
 let userRole = localStorage.getItem("userRole");
 
-// Load users from localStorage, or use default admin
+// Load users from localStorage, or use default admin and user accounts
 let users = JSON.parse(localStorage.getItem("users")) || [
-  { username: "admin", password: "admin123", role: "admin" }
+  { username: "admin", password: "admin123", role: "admin" },
+  { username: "user", password: "user123", role: "user" }
 ];
 
-// Helper: save users back to localStorage
-function saveUsers() {
-  localStorage.setItem("users", JSON.stringify(users));
+async function loadUsers() {
+  try {
+    const res = await fetch("/api/users");
+    if (!res.ok) throw new Error("Load users failed");
+    const serverUsers = await res.json();
+    
+    if (Array.isArray(serverUsers) && serverUsers.length > 0) {
+      users = serverUsers;
+      localStorage.setItem("users", JSON.stringify(users)); // update local backup
+      return true;
+    }
+  } catch (e) {
+    console.warn("Server load users failed:", e);
+  }
+  return false;
+}
+
+async function saveUsers() {
+  try {
+    localStorage.setItem("users", JSON.stringify(users)); // keep local backup
+    
+    // Save to server
+    const res = await fetch("/api/users", {
+      method: "POST", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(users)
+    });
+    
+    if (!res.ok) throw new Error("Save users failed");
+    console.log("✅ Users saved to server");
+  } catch (e) {
+    console.warn("Save users failed:", e);
+  }
 }
 
 function handleLogin() {
