@@ -2372,11 +2372,8 @@ for (let i = 0; i < projectBarRegions.length; i++) {
 let loggedInUser = localStorage.getItem("loggedInUser");
 let userRole = localStorage.getItem("userRole");
 
-// Load users from localStorage, or use default admin and user accounts
-let users = JSON.parse(localStorage.getItem("users")) || [
-  { username: "admin", password: "admin123", role: "admin" },
-  { username: "user", password: "user123", role: "user" }
-];
+// Users will be loaded from server only
+let users = [];
 
 async function loadUsers() {
   try {
@@ -2397,9 +2394,9 @@ async function loadUsers() {
 
 async function saveUsers() {
   try {
-    localStorage.setItem("users", JSON.stringify(users)); // keep local backup
-    
-    // Save to server
+    // Remove localStorage backup
+    // localStorage.setItem("users", JSON.stringify(users)); 
+    // Save to server only
     const res = await fetch("/api/users", {
       method: "POST", 
       headers: { "Content-Type": "application/json" },
