@@ -755,7 +755,7 @@ function render() {
 // group label 
 const groupLabel = document.createElement("span");
 groupLabel.className = "absolute clickable";
-groupLabel.style.left = sidePad + "px";          // 👈 label’s X position
+groupLabel.style.left = (sidePad + 10) + "px";   // 👈 label’s X position
 groupLabel.style.top = (y - 40) + "px";          // 👈 label’s Y position
 groupLabel.style.fontWeight = "700";
 groupLabel.style.fontSize = "1rem";
@@ -1076,7 +1076,7 @@ if (newTab.renderReport) {
 
 // 🔧 manual styling and positioning relative to timeline left edge
 compileBtn.style.position = "absolute";
-compileBtn.style.left = (sidePad + 150) + "px";  // 👈 adjust this number to set distance from left edge
+compileBtn.style.left = (sidePad + 105) + "px";  // 👈 adjust this number to set distance from left edge
 compileBtn.style.top = (y - 42) + "px";          // 👈 adjust this number to align vertically with group label
 compileBtn.style.fontSize = "0.7rem";
 compileBtn.style.padding = "2px 6px";
@@ -1102,7 +1102,7 @@ wrapper.appendChild(compileBtn);
   if (p.startDate) {
     const startLabel = document.createElement("span");
     startLabel.className = "absolute";
-    startLabel.style.left = (barXBase - 10) + "px";
+    startLabel.style.left = (barXBase + 65) + "px";
     startLabel.style.top  = (y - 10) + "px";
     startLabel.style.transform = "translateX(-100%) translateY(-50%)";
     startLabel.style.fontSize = "0.8rem";
