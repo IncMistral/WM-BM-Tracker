@@ -1143,13 +1143,14 @@ let tvPadding = 30; // Default for PC monitors
 console.log(`Screen width detected: ${window.screen.width}px`);
 
 if (window.screen.width >= 1920) {
-  tvPadding = 250; // Large screens (TVs) - increase this if still too wide
+  tvPadding = 50; // Large screens (TVs) - increase this if still too wide
   console.log(`TV detected! Using ${tvPadding}px padding`);
 }
 if (window.screen.width >= 3840) {
-  tvPadding = 350; // 4K TVs
+  tvPadding = 200; // 4K TVs
   console.log(`4K TV detected! Using ${tvPadding}px padding`);
 }
+
 
 const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
 
