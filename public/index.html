@@ -893,13 +893,21 @@ const logsForDate = logs.filter(l => {
 
               case "project-create": detailText = "Project created: " + (d.name || ""); break;
               case "project-delete": detailText = "Project deleted: " + (d.name || ""); break;
+              case "project-name-change":
+              detailText = "Project Name Changed From " + (d.from || "") + " to " + (d.to || "");
+              break;
               case "project-start-change":
               detailText = "Project Start Date Changed From " + (d.from || "") + " to " + (d.to || "");
               break;
               case "project-end-change":
               detailText = "Project End Date Changed From " + (d.from || "") + " to " + (d.to || "");
               break;
-
+              case "project-po-added":
+              detailText = "Added PO Number: " + (d.poNumber || "");
+              break;
+              case "project-po-change":
+              detailText = "PO Number Changed From " + (d.from || "") + " to " + (d.to || "");
+              break;
 
               case "milestone-add": detailText = "Milestone added: " + (d.label || ""); break;
               case "milestone-edit":
@@ -2026,6 +2034,28 @@ if (pi != null && pi !== undefined) {
     });
   }
 
+  // 1.5) PO Number change
+const prevPO = prev.poNumber || "";
+const newPO = payload.poNumber || "";
+
+if (prevPO !== newPO) {
+  if (prevPO === "" && newPO !== "") {
+    // Adding PO for the first time
+    addLogEntry(g.name, "project-po-added", {
+      groupIndex: gi,
+      projectIndex: pi,
+      poNumber: newPO
+    });
+  } else if (prevPO !== "" && newPO !== prevPO) {
+    // Changing existing PO
+    addLogEntry(g.name, "project-po-change", {
+      groupIndex: gi,
+      projectIndex: pi,
+      from: prevPO,
+      to: newPO
+    });
+  }
+}
   // 2) Start date change
   if ((prev.startDate || "") !== (payload.startDate || "")) {
     addLogEntry(g.name, "project-start-change", {
