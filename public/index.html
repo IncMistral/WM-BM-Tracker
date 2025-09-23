@@ -1130,14 +1130,43 @@ wrapper.appendChild(compileBtn);
     startLabel.style.left = (barXBase - 10) + "px";
     startLabel.style.top  = (y - 10) + "px";
     startLabel.style.transform = "translateX(-100%) translateY(-50%)";
-    startLabel.style.fontSize = "0.5rem";
+    startLabel.style.fontSize = "0.8rem";
     startLabel.style.color = "#ccc";
     startLabel.textContent = p.startDate;
     wrapper.appendChild(startLabel);
   }
 
   const barX = barXBase;
-  const barW = Math.max(200, wrapper.clientWidth - barX - sidePad);
+ // 🔧 COMPREHENSIVE AUTO-ADJUSTMENT
+function getSmartPadding() {
+  const screenWidth = window.screen.width;
+  const viewportWidth = window.innerWidth;
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  // Base padding
+  let padding = 30;
+  
+  // TV detection and adjustment
+  if (screenWidth >= 1920 && (viewportWidth / screenWidth) > 0.85) {
+    // Likely a TV - add overscan padding
+    padding += Math.min(screenWidth * 0.03, 120); // 3% of width, max 120px
+  }
+  
+  // Ultra-wide or very large displays
+  if (screenWidth >= 2560) {
+    padding += 40;
+  }
+  
+  // High DPI displays might need less padding
+  if (pixelRatio > 1.5) {
+    padding *= 0.8;
+  }
+  
+  return Math.floor(padding);
+}
+
+const smartPadding = getSmartPadding();
+const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - smartPadding);
 
   // bar + border
   const bar = document.createElement("div");
@@ -1332,9 +1361,9 @@ if (Array.isArray(p.milestones)) {
       const diff = Math.max(0, Math.ceil((end - today) / (1000*60*60*24)));
       const comp = document.createElement("div");
       comp.className = "completion";
-      comp.style.left = (barX + barW - 80) + "px";
+      comp.style.left = (barX + barW - 120) + "px";
       comp.style.top = (y - 16) + "px";
-      comp.style.fontSize = "0.5rem";
+      comp.style.fontSize = "0.8rem";
       comp.textContent = `${p.completionDate} | T - ${diff}`;
       wrapper.appendChild(comp);
     }
