@@ -2832,6 +2832,13 @@ const g = groups[gi];
   document.getElementById("trackerWrapper").style.display = "none";
   document.getElementById("reportPage").style.display = "block";
 
+  // Auto-refresh every 5 minutes for all users
+setInterval(() => {
+  if (loggedInUser) { // Only refresh if someone is logged in
+    window.location.reload();
+  }
+}, 300000); // 300000ms = 5 minutes
+
 </script>
 
 <div id="reportPage" style="display:none; padding:20px;">
