@@ -688,6 +688,7 @@ function render() {
   const wrapper = document.getElementById("trackerWrapper");
   if (!wrapper) return;
   wrapper.innerHTML = "";
+
   let y = 48;
 
   groupCardRegions = [];
@@ -1509,7 +1510,8 @@ if (btnApplyName) {
 }
 })();
 
-  /* ===================== TEAM MODAL (OFFLINE) ===================== */
+
+  /* ===================== TEAM MODAL ===================== */
 function renderTeamList(gi) {
   const list = document.getElementById('memberList');
   if (!list) return;
@@ -2226,16 +2228,19 @@ function wireToolbar() {
   render();
   });
 
-  // Force logout when window/tab is closed or refreshed
-  const clearSessionOnExit = () => {
+// Only clear session on manual logout - remove automatic clearing on page events
+const clearSessionOnExit = () => {
+  // Only clear if user explicitly logged out
+  const explicitLogout = sessionStorage.getItem("explicitLogout");
+  if (explicitLogout === "true") {
     try {
-      localStorage.removeItem("bm-currentUser"); // actual saved user
+      localStorage.removeItem("bm-currentUser");
       localStorage.removeItem("loggedInUser");
       localStorage.removeItem("userRole");
+      sessionStorage.removeItem("explicitLogout");
     } catch (_) {}
-  };
-  window.addEventListener("pagehide", clearSessionOnExit, { capture: true });
-  window.addEventListener("beforeunload", clearSessionOnExit, { capture: true });
+  }
+};
 
     // --- REPORT MODE (single-group compiled view) ---
   const m = window.location.hash.match(/^#?report=(\d+)$/);
