@@ -261,17 +261,19 @@ body {
     Apply
   </button>
 </div>
-       <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
+<div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
   <button id="btnGroupEditTeam">Edit Team</button>
   <button id="btnGroupNewProject">Add/Edit Project</button>
   <button id="btnGroupDelete" class="danger">Delete Group</button>
 </div>
 
-      <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
-      <button id="btnGroupClose">Close</button>
-      </div>
-    </div>
-  </div>
+<div id="groupProjectList"></div>
+
+<div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
+  <button id="btnGroupClose">Close</button>
+</div>
+</div>
+</div>
 
 <!-- Login Modal -->
 <div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
@@ -1976,9 +1978,10 @@ if (idx == null || idx === '') {
     if (start   instanceof HTMLInputElement) start.value   = p.startDate || '';
     if (comp    instanceof HTMLInputElement) comp.value    = p.completionDate || '';
 
-    // Render milestones for this project
-    renderMilestoneList(gi, (pi ?? g.projects.length));
-
+   // Render milestones for this project
+if (pi != null && pi !== undefined) {
+  renderMilestoneList(gi, pi);
+}
     // Wire buttons
     const btnSave  = document.getElementById('btnProjSave');
     const btnClose = document.getElementById('btnProjClose');
@@ -2688,16 +2691,19 @@ function renderUserList() {
     actions.appendChild(editBtn);
 
     // Remove button (not for default admin)
-    if (u.username !== "admin") {
-      const removeBtn = document.createElement("button");
-      removeBtn.textContent = "Remove";
-      removeBtn.onclick = () => {
-        users.splice(idx, 1);
-        saveUsers();
-        renderUserList();
-      };
-      actions.appendChild(removeBtn);
+if (u.username !== "admin") {
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "Remove";
+  removeBtn.onclick = () => {
+    if (!confirm(`Are you sure you want to remove user "${u.username}"? This action cannot be undone.`)) {
+      return;
     }
+    users.splice(idx, 1);
+    saveUsers();
+    renderUserList();
+  };
+  actions.appendChild(removeBtn);
+}
 
     row.appendChild(actions);
     userList.appendChild(row);
