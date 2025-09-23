@@ -531,7 +531,7 @@ function startAutoRefresh() {
   // Start new 5-minute refresh timer
   autoRefreshInterval = setInterval(() => {
     window.location.reload();
-  }, 10000); // 10000ms =  10 seconds
+  }, 300000); // 300000ms =  5 minutes
 }
 
 function stopAutoRefresh() {
