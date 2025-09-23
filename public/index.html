@@ -724,6 +724,48 @@ function render() {
 
   let y = 48;
 
+  // 🔧 COMPREHENSIVE AUTO-ADJUSTMENT - Enhanced for Large TVs
+function getSmartPadding() {
+  const screenWidth = window.screen.width;
+  const viewportWidth = window.innerWidth;
+  const screenHeight = window.screen.height;
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  // Base padding
+  let padding = 30;
+  
+  // Enhanced TV detection - multiple criteria
+  const isLargeScreen = screenWidth >= 1920 || screenHeight >= 1080;
+  const isFullscreen = (viewportWidth / screenWidth) > 0.85;
+  const isWideAspect = (screenWidth / screenHeight) > 1.5;
+  const isLikelyTV = isLargeScreen && (isFullscreen || isWideAspect);
+  
+  if (isLikelyTV) {
+    // More aggressive TV padding
+    if (screenWidth >= 3840) {
+      padding += 200;  // 4K+ TVs
+    } else if (screenWidth >= 2560) {
+      padding += 150;  // 1440p+ displays
+    } else if (screenWidth >= 1920) {
+      padding += 120;  // 1080p TVs (your 65" TV)
+    } else {
+      padding += 80;   // Smaller TVs
+    }
+  }
+  
+  // Extra padding for very wide screens regardless of TV detection
+  if (screenWidth >= 2560) {
+    padding += 40;
+  }
+  
+  // High DPI displays might need less padding
+  if (pixelRatio > 1.5) {
+    padding *= 0.9;
+  }
+  
+  return Math.floor(padding);
+}
+
   groupCardRegions = [];
   attachGroupHoverHandlers();
   projectBarRegions = [];
@@ -1136,48 +1178,7 @@ wrapper.appendChild(compileBtn);
     wrapper.appendChild(startLabel);
   }
 
-  const barX = barXBase;
-// 🔧 COMPREHENSIVE AUTO-ADJUSTMENT - Enhanced for Large TVs
-function getSmartPadding() {
-  const screenWidth = window.screen.width;
-  const viewportWidth = window.innerWidth;
-  const screenHeight = window.screen.height;
-  const pixelRatio = window.devicePixelRatio || 1;
-  
-  // Base padding
-  let padding = 30;
-  
-  // Enhanced TV detection - multiple criteria
-  const isLargeScreen = screenWidth >= 1920 || screenHeight >= 1080;
-  const isFullscreen = (viewportWidth / screenWidth) > 0.85;
-  const isWideAspect = (screenWidth / screenHeight) > 1.5;
-  const isLikelyTV = isLargeScreen && (isFullscreen || isWideAspect);
-  
-  if (isLikelyTV) {
-    // More aggressive TV padding
-    if (screenWidth >= 3840) {
-      padding += 200;  // 4K+ TVs
-    } else if (screenWidth >= 2560) {
-      padding += 150;  // 1440p+ displays
-    } else if (screenWidth >= 1920) {
-      padding += 120;  // 1080p TVs (your 65" TV)
-    } else {
-      padding += 80;   // Smaller TVs
-    }
-  }
-  
-  // Extra padding for very wide screens regardless of TV detection
-  if (screenWidth >= 2560) {
-    padding += 40;
-  }
-  
-  // High DPI displays might need less padding
-  if (pixelRatio > 1.5) {
-    padding *= 0.9;
-  }
-  
-  return Math.floor(padding);
-}
+const barX = barXBase;
 const smartPadding = getSmartPadding();
 const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - smartPadding);
 
