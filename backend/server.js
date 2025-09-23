@@ -258,6 +258,35 @@ app.delete("/api/users/:username", (req, res) => {
   }
 });
 
+// ✅ NEW: Recovery endpoint to view users and system info
+app.get("/api/admin/recovery", (req, res) => {
+  try {
+    console.log("=== RECOVERY REQUEST ===");
+    console.log("DATA_FILE:", DATA_FILE);
+    console.log("USERS_FILE:", USERS_FILE);
+    console.log("DATA_FILE exists:", fs.existsSync(DATA_FILE));
+    console.log("USERS_FILE exists:", fs.existsSync(USERS_FILE));
+    
+    const users = loadUsers();
+    const data = loadData();
+    
+    res.json({
+      users: users,
+      userCount: users.length,
+      groupCount: data.groups ? data.groups.length : 0,
+      logCount: data.logs ? data.logs.length : 0,
+      filePaths: {
+        dataFile: DATA_FILE,
+        usersFile: USERS_FILE,
+        dataExists: fs.existsSync(DATA_FILE),
+        usersExists: fs.existsSync(USERS_FILE)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ======================================================== //
 
 // Start server
