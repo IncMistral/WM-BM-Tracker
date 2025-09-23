@@ -13,9 +13,10 @@ app.use(express.json());
 // Serve static frontend (index.html, etc.) from ../public
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// ✅ FIXED: Use relative paths within your project
-const DATA_FILE = path.join(__dirname, "data.json");
-const USERS_FILE = path.join(__dirname, "users.json");
+// ✅ Use persistent disk path on Render
+const DATA_FILE = path.join("/backend", "data.json");
+// ✅ NEW: Add users file
+const USERS_FILE = path.join("/backend", "users.json");
 
 // Ensure data file exists
 if (!fs.existsSync(DATA_FILE)) {
