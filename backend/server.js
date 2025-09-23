@@ -6,17 +6,21 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Allow cross-origin requests (so frontend can call backend)
+// Allow cross-origin requests
 app.use(cors());
 app.use(express.json());
 
-// Serve static frontend (index.html, etc.) from ../public
+// Serve static frontend
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// ✅ Use persistent disk path on Render
-const DATA_FILE = path.join("/backend", "data.json");
-// ✅ NEW: Add users file
-const USERS_FILE = path.join("/backend", "users.json");
+// ✅ FIXED: Use relative paths in your project directory
+const DATA_FILE = path.join(__dirname, "data.json");
+const USERS_FILE = path.join(__dirname, "users.json");
+
+// Debug logging
+console.log("Server directory:", __dirname);
+console.log("Data file will be:", DATA_FILE);
+console.log("Users file will be:", USERS_FILE);
 
 // Ensure data file exists
 if (!fs.existsSync(DATA_FILE)) {
