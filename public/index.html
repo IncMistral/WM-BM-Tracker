@@ -519,6 +519,27 @@ function addLogEntry(groupName, type, details) {
     .catch(err => console.error("Failed to save log:", err));
 }
 
+// Auto-refresh every 5 minutes for all users when logged in
+let autoRefreshInterval = null;
+
+function startAutoRefresh() {
+  // Clear any existing interval first
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+  }
+  
+  // Start new 5-minute refresh timer
+  autoRefreshInterval = setInterval(() => {
+    window.location.reload();
+  }, 10000); // 10000ms =  10 seconds
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+  }
+}
 
 /* ===================== DAILY LOG COMPILER ===================== */
 function compileDailyLogs() {
@@ -2415,6 +2436,9 @@ function handleLogin() {
 
   document.getElementById("screenOverlay").style.display = "none";
   closeModal('loginModal');
+
+      // Start auto-refresh after successful login
+  startAutoRefresh();
 }
 
   function handleLogout() {
@@ -2666,6 +2690,11 @@ function addUser() {
       btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
     }
 
+      document.getElementById("screenOverlay").style.display = "none";
+  
+  // Start auto-refresh if user is already logged in on page load
+  startAutoRefresh();
+
     applyPermissions();
   }
   renderUserList();
@@ -2831,13 +2860,6 @@ const g = groups[gi];
 
   document.getElementById("trackerWrapper").style.display = "none";
   document.getElementById("reportPage").style.display = "block";
-
-  // Auto-refresh every 5 minutes for all users
-setInterval(() => {
-  if (loggedInUser) { // Only refresh if someone is logged in
-    window.location.reload();
-  }
-}, 10000); // 10000ms = 5 minutes
 
 </script>
 
