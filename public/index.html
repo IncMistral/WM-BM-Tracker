@@ -107,7 +107,7 @@
     .milestone.overdue { background:var(--danger); }
     .milestone-label, .milestone-date{ font-size: var(--fs-8); text-shadow: 0 1px 1px rgba(0,0,0,.4); }
     .milestone-label {
-      font-size: var(--fs-8);
+      font-size: var(--fs-12);
       color: #fff;
       font-weight: 600;
     }
@@ -262,15 +262,10 @@ body {
   </button>
 </div>
        <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
-        <button id="btnGroupEditTeam">Edit Team</button>
-        <button id="btnGroupDelete" class="danger">Delete Group</button>
-      </div>
-
-      <h4 style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-        GROUP PROJECTS
-        <button id="btnGroupNewProject" title="Add Project" style="padding:0 0.5rem; font-size:0.8rem;">+</button>
-      </h4>
-      <div id="groupProjectList"></div>
+  <button id="btnGroupEditTeam">Edit Team</button>
+  <button id="btnGroupNewProject">Add/Edit Project</button>
+  <button id="btnGroupDelete" class="danger">Delete Group</button>
+</div>
 
       <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
       <button id="btnGroupClose">Close</button>
@@ -296,13 +291,28 @@ body {
   <!-- Project Modal -->
   <div id="projectModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
     <div class="modalContent">
-      <h3 id="projectModalTitle">EDIT PROJECT</h3>
-      <input type="text" id="projectNameInput" placeholder="Project name" />
-            <div class="row">
-        <input type="date" id="projectStartDate" placeholder="Project Start Date" />
-        <input type="date" id="projectCompletionDate" placeholder="Project Completion Date" />
-      </div>
-       <h4>Milestones</h4>
+      <h3 id="projectModalTitle">ADD / EDIT PROJECT</h3>
+ <div class="row">
+  <div style="flex: 1;">
+    <label for="projectNameInput" style="display: block; margin-bottom: 0.25rem; color: var(--text); font-size: var(--fs-12);">Project Name</label>
+    <input type="text" id="projectNameInput" placeholder="Project name" style="width: 90%; margin: 0.3125rem auto; padding: 0.375rem; font-size: var(--fs-14); background: #222; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); display: block;" />
+  </div>
+  <div style="flex: 1;">
+    <label for="projectPOInput" style="display: block; margin-bottom: 0.25rem; color: var(--text); font-size: var(--fs-12);">PO Number</label>
+    <input type="text" id="projectPOInput" placeholder="PO Number" style="width: 90%; margin: 0.3125rem auto; padding: 0.375rem; font-size: var(--fs-14); background: #222; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); display: block;" />
+  </div>
+</div>
+      <div class="row">
+  <div style="flex: 1;">
+    <label for="projectStartDate" style="display: block; margin-bottom: 0.25rem; color: var(--text); font-size: var(--fs-12);">Project Start Date</label>
+    <input type="date" id="projectStartDate" placeholder="Project Start Date" />
+  </div>
+  <div style="flex: 1;">
+    <label for="projectCompletionDate" style="display: block; margin-bottom: 0.25rem; color: var(--text); font-size: var(--fs-12);">Project End Date</label>
+    <input type="date" id="projectCompletionDate" placeholder="Project Completion Date" />
+  </div>
+</div>
+       <h4>MILESTONES</h4>
       <div id="milestoneList"></div>
       <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
         <button id="btnProjAddMilestone">Add Milestone</button>
@@ -1086,17 +1096,32 @@ wrapper.appendChild(compileBtn);
 }
 
 (g.projects || []).forEach((p, pi) => {
+
   // project name
   const projName = document.createElement("span");
   projName.className = "absolute";
   projName.style.left = sidePad + "px";
-  projName.style.top = (y + BAR_HEIGHT/2 - 10) + "px";
+  projName.style.top = (y + BAR_HEIGHT/2 - 28) + "px";
   projName.style.width = labelColWidth + "px";
   projName.style.textAlign = "right";
-  projName.style.fontSize = "1rem";
+  projName.style.fontSize = ".75rem";
   projName.style.color = "white";
   projName.textContent = p.name;
   wrapper.appendChild(projName);
+
+  // PO number display
+if (p.poNumber) {
+  const poNumber = document.createElement("span");
+  poNumber.className = "absolute";
+  poNumber.style.left = sidePad + "px";
+  poNumber.style.top = (y + BAR_HEIGHT/2 - 5) + "px";  // Position below project name
+  poNumber.style.width = labelColWidth + "px";
+  poNumber.style.textAlign = "right";
+  poNumber.style.fontSize = "0.75rem";
+  poNumber.style.color = "#ccc";  // Slightly dimmed color
+  poNumber.textContent = "PO: " + p.poNumber;
+  wrapper.appendChild(poNumber);
+}
 
   // start date label
   if (p.startDate) {
@@ -1266,7 +1291,7 @@ if (Array.isArray(p.milestones)) {
 
       const dateLbl = document.createElement("div");
       dateLbl.className = "milestone-date";
-      dateLbl.textContent = fmtMilestoneDate(m.date);
+      
 
       labelWrap.appendChild(lbl);
       labelWrap.appendChild(dateLbl);
@@ -1946,6 +1971,8 @@ if (idx == null || idx === '') {
     const comp    = document.getElementById('projectCompletionDate');
 
     if (nameInp instanceof HTMLInputElement) nameInp.value = p.name || '';
+    const poInp = document.getElementById('projectPOInput');
+    if (poInp instanceof HTMLInputElement) poInp.value = p.poNumber || '';
     if (start   instanceof HTMLInputElement) start.value   = p.startDate || '';
     if (comp    instanceof HTMLInputElement) comp.value    = p.completionDate || '';
 
@@ -1960,12 +1987,13 @@ if (idx == null || idx === '') {
 
           if (btnSave) {
        btnSave.onclick = () => {
-  const payload = {
-    name: (nameInp instanceof HTMLInputElement) ? (nameInp.value.trim() || 'Project') : 'Project',
-    startDate: (start instanceof HTMLInputElement) ? (start.value || '') : '',
-    completionDate: (comp instanceof HTMLInputElement) ? (comp.value || '') : '',
-    milestones: Array.isArray(p.milestones) ? p.milestones : []
-  };
+    const payload = {
+      name: (nameInp instanceof HTMLInputElement) ? (nameInp.value.trim() || 'Project') : 'Project',
+      poNumber: (poInp instanceof HTMLInputElement) ? (poInp.value.trim() || '') : '',
+      startDate: (start instanceof HTMLInputElement) ? (start.value || '') : '',
+      completionDate: (comp instanceof HTMLInputElement) ? (comp.value || '') : '',
+      milestones: Array.isArray(p.milestones) ? p.milestones : []
+    };
 
   let projectIndex;
 
