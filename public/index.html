@@ -11,7 +11,7 @@
   --bg-elev: #f8f9fa;
   --bg-elev-2: #f1f3f4;
 --text: #000000;
---text-muted: #333333;
+--text-muted: #000000;
   --border: rgba(0,0,0,0.15);
   --accent: #0d6efd;
   --accent-600: #0b5ed7;
@@ -105,14 +105,14 @@ body {
     button:focus-visible{ box-shadow: 0 0 0 0.125rem rgba(0,172,193,.25), 0 0 0 0.25rem rgba(0,172,193,.25); }
     button[disabled]{ opacity:.6; cursor:not-allowed; box-shadow:none; }
 
-    input, select{
+input, select{
   padding: 0.375rem;
   margin: 0.3125rem auto;
   font-size: var(--fs-14);
   width: 90%;
   display: block;
   background: #ffffff;
-  color: var(--text);
+  color: #000000;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   outline: none;
@@ -165,12 +165,16 @@ body {
 
     /* Modals */
     .modal { display:none; position:fixed; inset:0; justify-content:center; align-items:center; z-index:2000; }
-    .modalContent {
-  background: var(--bg-elev-2);
-  border: 2px solid white;
+.modalContent {
+  background: #dee2e6;
+  border: 2px solid var(--border);
   box-shadow: var(--shadow-2);
   border-radius: var(--radius-md);
-  padding:1.25rem; color:white; width:35rem; max-width:90vw; text-align:center;
+  padding: 1.25rem;
+  color: #000000;
+  width: 35rem;
+  max-width: 90vw;
+  text-align: center;
 }
     .modalContent h4 { margin:0.875rem 0 0.5rem; }
 
@@ -212,7 +216,7 @@ body {
 .group-card{
   position: absolute;
   left: 1rem;
-  background: #ffffff;
+  background: #dee2e6;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-1);
@@ -337,11 +341,11 @@ body {
  <div class="row">
   <div style="flex: 1;">
     <label for="projectNameInput" style="display: block; margin-bottom: 0.25rem; color: var(--text); font-size: var(--fs-12);">Project Name</label>
-    <input type="text" id="projectNameInput" placeholder="Project name" style="width: 90%; margin: 0.3125rem auto; padding: 0.375rem; font-size: var(--fs-14); background: #222; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); display: block;" />
+    <input type="text" id="projectNameInput" placeholder="Project name" style="width: 90%; margin: 0.3125rem auto; padding: 0.375rem; font-size: var(--fs-14); background: #ffffff; color: #000000; border: 1px solid var(--border); border-radius: var(--radius-sm); display: block;" />
   </div>
   <div style="flex: 1;">
     <label for="projectPOInput" style="display: block; margin-bottom: 0.25rem; color: var(--text); font-size: var(--fs-12);">PO Number</label>
-    <input type="text" id="projectPOInput" placeholder="PO Number" style="width: 90%; margin: 0.3125rem auto; padding: 0.375rem; font-size: var(--fs-14); background: #222; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); display: block;" />
+    <input type="text" id="projectPOInput" placeholder="PO Number" style="width: 90%; margin: 0.3125rem auto; padding: 0.375rem; font-size: var(--fs-14); background: #ffffff; color: #000000; border: 1px solid var(--border); border-radius: var(--radius-sm); display: block;" />
   </div>
 </div>
       <div class="row">
@@ -836,7 +840,7 @@ teamContainer.className = "absolute group-" + gi;
       box.style.flexDirection = "column";
       box.style.alignItems = "center";
       box.style.minWidth = "90px";
-      box.style.gap = "8px";
+      box.style.gap = "4px";
 
       const roleEl = document.createElement("div");
       roleEl.className = "teamRole";
