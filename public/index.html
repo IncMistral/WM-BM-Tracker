@@ -948,22 +948,22 @@ function renderMaximizedGroup(groupIndex) {
     let start = parseLocalDate(p.startDate);
     let end   = parseLocalDate(p.completionDate);
     
-    // For non-admin users, restrict to current month only
-    if (currentUser?.role === "user") {
-      const monthRange = getCurrentMonthRange();
-      const monthStart = parseLocalDate(monthRange.start);
-      const monthEnd = parseLocalDate(monthRange.end);
-      
-      // Only show timeline if project overlaps with current month
-      if (end < monthStart || start > monthEnd) {
-        y += BAR_HEIGHT + GAP;
-        return; // Skip this project entirely
-      }
-      
-      // Constrain timeline to current month boundaries
-      start = start < monthStart ? monthStart : start;
-      end = end > monthEnd ? monthEnd : end;
-    }
+// For non-admin users, restrict to current month only
+if (currentUser?.role === "user") {
+  const monthRange = getCurrentMonthRange();
+  const monthStart = parseLocalDate(monthRange.start);
+  const monthEnd = parseLocalDate(monthRange.end);
+  
+  // Only show timeline if project overlaps with current month
+  if (end < monthStart || start > monthEnd) {
+    y += BAR_HEIGHT + GAP;
+    return; // Skip this project entirely
+  }
+  
+  // For users, always show the full current month regardless of project dates
+  start = monthStart;
+  end = monthEnd;
+}
 
   const totalDays = Math.max(1, Math.ceil(
     (Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()) -
@@ -2901,7 +2901,7 @@ if (wrapper) {
   wrapper.addEventListener("wheel", (e) => {
     if (e.ctrlKey) return; // let ctrl+wheel for browser zoom pass through
     e.preventDefault();
-    
+
     // Disable zoom for users
     if (currentUser?.role === "user") return;
 
