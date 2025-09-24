@@ -1044,6 +1044,82 @@ if (p.startDate && p.completionDate) {
     });
   }
 
+  function attachMaximizedEventHandlers(overlay) {
+  // Remove any existing handlers to prevent duplicates
+  const existingHandlers = overlay._eventHandlers || {};
+  
+  if (existingHandlers.wheel) {
+    overlay.removeEventListener('wheel', existingHandlers.wheel);
+  }
+  
+  // Wheel zoom handler for maximized view
+  const wheelHandler = (e) => {
+    if (e.ctrlKey) return;
+    e.preventDefault();
+
+    const r = overlay.getBoundingClientRect();
+    const x = e.clientX - r.left + overlay.scrollLeft;
+    const y = e.clientY - r.top + overlay.scrollTop;
+
+    // Find which project bar is under the mouse
+    let target = null;
+    for (let i = 0; i < projectBarRegions.length; i++) {
+      const reg = projectBarRegions[i];
+      if (reg.gi === maximizedGroupIndex && 
+          x >= reg.x1 && x <= reg.x2 && 
+          y >= reg.y1 && y <= reg.y2) {
+        target = reg;
+        break;
+      }
+    }
+
+    if (!target) return;
+
+    const key = `${target.gi}-${target.pi}`;
+    const curZoom = projectZoomLevels[key] || 15;
+    const p = groups[target.gi].projects[target.pi];
+    
+    if (!p.startDate || !p.completionDate) return;
+
+    const totalDays = Math.max(1, Math.ceil(
+      (Date.UTC(
+        p.completionDate.split("-")[0],
+        p.completionDate.split("-")[1] - 1,
+        p.completionDate.split("-")[2]
+      ) -
+      Date.UTC(
+        p.startDate.split("-")[0],
+        p.startDate.split("-")[1] - 1,
+        p.startDate.split("-")[2]
+      )
+    ) / DAY_MS));
+
+    const oldViewport = Math.min(totalDays, curZoom);
+    const oldOffset = getOffset(target.gi, target.pi);
+
+    const barWidth = target.x2 - target.x1;
+    const cursorFrac = (x - target.x1) / barWidth;
+    const cursorDay = oldOffset + Math.round(cursorFrac * oldViewport);
+
+    let newZoom = curZoom;
+    if (e.deltaY < 0) newZoom = Math.max(15, curZoom - 1);
+    else newZoom = Math.min(90, curZoom + 1);
+    projectZoomLevels[key] = newZoom;
+
+    const newViewport = Math.min(totalDays, newZoom);
+    let newOffset = cursorDay - Math.round(cursorFrac * newViewport);
+    newOffset = Math.max(0, Math.min(totalDays - newViewport, newOffset));
+    setOffset(target.gi, target.pi, newOffset);
+
+    renderMaximizedGroup(maximizedGroupIndex);
+  };
+
+  overlay.addEventListener('wheel', wheelHandler, { passive: false });
+  
+  // Store handler reference for cleanup
+  overlay._eventHandlers = { wheel: wheelHandler };
+}
+
   // ticks + labels LAST
   for (let i = 0; i <= viewportDays; i++) {
     const curDate   = addDaysLocal(visibleStart, i);
