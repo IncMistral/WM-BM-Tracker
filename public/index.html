@@ -1852,8 +1852,10 @@ y += 60;
       chk.type = "checkbox";
       chk.setAttribute("data-pi", String(pi));
 
-      const name = document.createElement("span");
-      name.textContent = p.name || "Untitled Project";
+const name = document.createElement("span");
+const projectName = p.name || "Untitled Project";
+const poNumber = p.poNumber ? ` (${p.poNumber})` : "";
+name.textContent = projectName + poNumber;
 
       const dates = document.createElement("span");
       dates.style.flex = "0 0 auto";
