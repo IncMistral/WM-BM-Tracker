@@ -986,7 +986,7 @@ const logsForDate = logs.filter(l => {
           }
         }
 
-        document.getElementById("btnViewLogs").onclick = () => {
+document.getElementById("btnViewLogs").onclick = () => {
           const dd = document.getElementById("logDropdown");
           if (!dd || !dd.value) return;
 
@@ -1004,28 +1004,58 @@ const logsForDate = logs.filter(l => {
             currentDate = null;
             document.getElementById("btnViewLogs").textContent = "View Logs";
           }
-
-          document.getElementById("btnDeleteLogs").onclick = async () => {
-  const password = prompt("Enter password to delete logs:");
-  if (password !== "guest820") {
-    alert("Incorrect password. Logs were not deleted.");
-    return;
-  }
-
-  if (!confirm("Are you sure you want to delete ALL logs for this group?")) return;
-
-  // 🔴 Call the new endpoint (delete all logs for this group, any date)
-  await fetch("/api/logs/" + encodeURIComponent(groupName), {
-    method: "DELETE"
-  });
-
-  // Clear the UI
-  refreshLogDropdown(groupName);
-  document.getElementById("logContent").innerHTML = "";
-};
-
         };
 
+        document.getElementById("btnDeleteLogs").onclick = async () => {
+          const dd = document.getElementById("logDropdown");
+          if (!dd || !dd.value) {
+            alert("Please select a log date to delete.");
+            return;
+          }
+          
+          const selectedDate = dd.value;
+          const password = prompt("Enter password to delete logs:");
+          if (password !== "guest820") {
+            alert("Incorrect password. Logs were not deleted.");
+            return;
+          }
+
+          if (!confirm("Are you sure you want to delete ALL logs for " + groupName + " on " + selectedDate + "? This cannot be undone.")) return;
+
+          try {
+            const response = await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(selectedDate), {
+              method: "DELETE"
+            });
+
+            if (!response.ok) throw new Error("Server delete failed");
+
+            for (let i = logs.length - 1; i >= 0; i--) {
+              const log = logs[i];
+              if (log.date === selectedDate) {
+                let shouldDelete = false;
+                
+                if (log.type === "group-create" || log.type === "group-delete") {
+                  shouldDelete = true;
+                } else if (log.group && log.group.toLowerCase() === groupName.toLowerCase()) {
+                  shouldDelete = true;
+                } else if (!log.group || log.group.toLowerCase() === "unknowngroup") {
+                  shouldDelete = true;
+                }
+                
+                if (shouldDelete) {
+                  logs.splice(i, 1);
+                }
+              }
+            }
+
+            document.getElementById("logContent").innerHTML = "";
+            refreshLogDropdown(groupName);
+            alert("Logs deleted successfully.");
+            
+          } catch (error) {
+            alert("Failed to delete logs. Please try again.");
+          }
+        };
         document.addEventListener("DOMContentLoaded", () => {
           refreshLogDropdown(groupName);
           console.log("✅ Dropdown initialized for", groupName);
