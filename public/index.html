@@ -263,7 +263,7 @@ body {
 </div>
 <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
   <button id="btnGroupEditTeam">Edit Team</button>
-  <button id="btnGroupNewProject">Add/Edit Project</button>
+  <button id="btnGroupNewProject">Add Project</button>
   <button id="btnGroupDelete" class="danger">Delete Group</button>
 </div>
 
@@ -293,7 +293,7 @@ body {
   <!-- Project Modal -->
   <div id="projectModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
     <div class="modalContent">
-      <h3 id="projectModalTitle">ADD / EDIT PROJECT</h3>
+      <h3 id="projectModalTitle">ADD PROJECT</h3>
  <div class="row">
   <div style="flex: 1;">
     <label for="projectNameInput" style="display: block; margin-bottom: 0.25rem; color: var(--text); font-size: var(--fs-12);">Project Name</label>
@@ -1986,7 +1986,10 @@ if (idx == null || idx === '') {
     if (start   instanceof HTMLInputElement) start.value   = p.startDate || '';
     if (comp    instanceof HTMLInputElement) comp.value    = p.completionDate || '';
 
-   // Render milestones for this project
+// Clear milestone list for new projects
+document.getElementById('milestoneList').innerHTML = '';
+
+// Render milestones for this project
 if (pi != null && pi !== undefined) {
   renderMilestoneList(gi, pi);
 }
