@@ -142,6 +142,54 @@ app.delete("/api/logs/:groupName", (req, res) => {
   });
 });
 
+// DELETE logs for a specific group AND date
+app.delete("/api/logs/:groupName/:date", (req, res) => {
+  const { groupName, date } = req.params;
+  const data = loadData();
+
+  const decodedGroupName = decodeURIComponent(groupName);
+  const decodedDate = decodeURIComponent(date);
+
+  console.log(`Deleting logs for group: ${decodedGroupName}, date: ${decodedDate}`);
+
+  const before = data.logs.length;
+  data.logs = data.logs.filter(log => {
+    // Keep logs that don't match the criteria
+    if (log.date !== decodedDate) return true;
+
+    // Always delete group-create and group-delete regardless of group
+    if (log.type === "group-create" || log.type === "group-delete") {
+      return false; // delete it
+    }
+
+    // Delete logs that belong to this specific group
+    if (log.group && log.group.toLowerCase() === decodedGroupName.toLowerCase()) {
+      return false; // delete it
+    }
+
+    // Delete logs with unknown/missing group
+    if (!log.group || log.group.toLowerCase() === "unknowngroup") {
+      return false; // delete it
+    }
+
+    return true; // keep it
+  });
+
+  const after = data.logs.length;
+  const removed = before - after;
+
+  saveData(data);
+  
+  console.log(`Removed ${removed} logs for ${decodedGroupName} on ${decodedDate}`);
+  
+  res.json({
+    status: "deleted",
+    groupName: decodedGroupName,
+    date: decodedDate,
+    removed: removed,
+  });
+});
+
 // ====================== USER MANAGEMENT API ====================== //
 
 // ✅ NEW: GET all users
