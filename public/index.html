@@ -10,8 +10,8 @@
   --bg: #ffffff;
   --bg-elev: #f8f9fa;
   --bg-elev-2: #f1f3f4;
-  --text: #212529;
-  --text-muted: #6c757d;
+--text: #000000;
+--text-muted: #333333;
   --border: rgba(0,0,0,0.15);
   --accent: #0d6efd;
   --accent-600: #0b5ed7;
@@ -132,30 +132,31 @@ body {
     .milestone.complete { background:var(--success); }
     .milestone.overdue { background:var(--danger); }
     .milestone-label, .milestone-date{ font-size: var(--fs-8); text-shadow: 0 1px 1px rgba(0,0,0,.4); }
+   
     .milestone-label {
-      font-size: var(--fs-12);
-      color: #fff;
-      font-weight: 600;
-    }
+  font-size: var(--fs-12);
+  color: #000000;
+  font-weight: 600;
+}
 
     .milestone-date {
-      font-size: var(--fs-8);
-      color: #ccc;
-    }
+  font-size: var(--fs-8);
+  color: #000000;
+}
 
-    .completion { position:absolute; font-size:var(--fs-12); color:white; white-space:nowrap; pointer-events:none; }
+    .completion { position:absolute; font-size:var(--fs-12); color:#000000; white-space:nowrap; pointer-events:none; }
     .weekendHatch { background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 6px); pointer-events:none; }
 
-    .dayLetter {
-      position:absolute;
-      font-size: var(--fs-10); /* ~10px */
-      color:rgba(255,255,255,0.85);
-      transform:translate(-50%,-50%);
-      pointer-events:none;
-      line-height:1.1;
-      text-align:center;
-      white-space:nowrap;
-    }
+   .dayLetter {
+  position:absolute;
+  font-size: var(--fs-10); /* ~10px */
+  color: #000000;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  line-height:1.1;
+  text-align:center;
+  white-space:nowrap;
+}
 
     .tick { pointer-events:none; }
     .draggable { cursor: grab; }
