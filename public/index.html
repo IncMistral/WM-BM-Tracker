@@ -518,7 +518,7 @@ function addLogEntry(groupName, type, details) {
 
   const entry = {
     ts: Date.now(),
-    date: new Date().toISOString().split("T")[0],
+    date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0],
     group: safeGroup,
     user: currentUser?.username || "unknown",
     type,
