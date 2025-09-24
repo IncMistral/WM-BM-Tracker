@@ -621,6 +621,20 @@ function compileDailyLogs() {
   let projectZoomLevels = {};
   const DAY_MS = 24*60*60*1000;
 
+  function getCurrentMonthRange() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  
+  const startOfMonth = new Date(year, month, 1);
+  const endOfMonth = new Date(year, month + 1, 0); // Last day of current month
+  
+  return {
+    start: startOfMonth.toISOString().split('T')[0], // YYYY-MM-DD format
+    end: endOfMonth.toISOString().split('T')[0]
+  };
+}
+
   /* ===================== PROJECT VIEW-STATE (OFFLINE) ===================== */
   // Unique key for a project (group + project fields)
   function makeProjKey(groupName, p) {
@@ -930,9 +944,26 @@ function renderMaximizedGroup(groupIndex) {
     content.appendChild(border);
 
 // fill, milestones, ticks
-if (p.startDate && p.completionDate) {
-  const start = parseLocalDate(p.startDate);
-  const end   = parseLocalDate(p.completionDate);
+  if (p.startDate && p.completionDate) {
+    let start = parseLocalDate(p.startDate);
+    let end   = parseLocalDate(p.completionDate);
+    
+    // For non-admin users, restrict to current month only
+    if (currentUser?.role === "user") {
+      const monthRange = getCurrentMonthRange();
+      const monthStart = parseLocalDate(monthRange.start);
+      const monthEnd = parseLocalDate(monthRange.end);
+      
+      // Only show timeline if project overlaps with current month
+      if (end < monthStart || start > monthEnd) {
+        y += BAR_HEIGHT + GAP;
+        return; // Skip this project entirely
+      }
+      
+      // Constrain timeline to current month boundaries
+      start = start < monthStart ? monthStart : start;
+      end = end > monthEnd ? monthEnd : end;
+    }
 
   const totalDays = Math.max(1, Math.ceil(
     (Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()) -
@@ -1668,7 +1699,16 @@ const border = document.createElement("div");
        Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) / DAY_MS
     ));
 
-    const zoomDays = projectZoomLevels[`${gi}-${pi}`] || 15;
+    let zoomDays = projectZoomLevels[`${gi}-${pi}`] || 15;
+
+    // For users, set zoom to show current month (typically 28-31 days)
+    if (currentUser?.role === "user") {
+      const monthRange = getCurrentMonthRange();
+      const monthStart = parseLocalDate(monthRange.start);
+      const monthEnd = parseLocalDate(monthRange.end);
+      const monthDays = Math.ceil((monthEnd - monthStart) / DAY_MS) + 1;
+      zoomDays = monthDays;
+    }
     const viewportDays = Math.min(totalDays, zoomDays);
     const maxOffset = Math.max(0, totalDays - viewportDays);
 
@@ -3274,7 +3314,7 @@ function addUser() {
   if (btnClose) btnClose.onclick = () => closeModal('editUserModal');
   if (btnAdd) btnAdd.onclick = () => addUser();
 
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   if (loggedInUser && userRole) {
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) btnLogin.textContent = "Log out";
@@ -3288,6 +3328,29 @@ function addUser() {
   
   // Start auto-refresh if user is already logged in on page load
   startAutoRefresh();
+
+    // Auto-refresh timeline on first of month for users
+    if (currentUser?.role === "user") {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setHours(0, 1, 0, 0); // 12:01 AM tomorrow
+      
+      // If tomorrow is the first of the month, set up auto-refresh
+      if (tomorrow.getDate() === 1) {
+        const msUntilRefresh = tomorrow.getTime() - now.getTime();
+        setTimeout(() => {
+          render(); // Refresh to show new month
+          // Set up daily check for first-of-month refresh
+          setInterval(() => {
+            const checkDate = new Date();
+            if (checkDate.getDate() === 1 && checkDate.getHours() === 0 && checkDate.getMinutes() === 1) {
+              render();
+            }
+          }, 60000); // Check every minute
+        }, msUntilRefresh);
+      }
+    }
 
     applyPermissions();
   }
