@@ -1292,14 +1292,27 @@ const viewportDays = Math.min(totalDays, zoomDays);
     const maxOffset = Math.max(0, totalDays - viewportDays);
 
     let offsetDays;
-    if (currentUser?.role === "user") {
-      // For users, always start from the beginning of the month (no offset)
-      offsetDays = 0;
-    } else {
-      // For admins, use the existing offset system
-      offsetDays = Math.min(getOffset(gi,pi), maxOffset);
-      setOffset(gi,pi, offsetDays);
-    }
+if (currentUser?.role === "user") {
+  // For users, calculate offset to show current month from day 1
+  const monthRange = getCurrentMonthRange();
+  const currentMonthStart = parseLocalDate(monthRange.start);
+  const projectStart = parseLocalDate(p.startDate);
+  
+  if (currentMonthStart >= projectStart) {
+    // Calculate days from project start to current month start
+    offsetDays = Math.ceil((currentMonthStart - projectStart) / DAY_MS);
+  } else {
+    // Current month is before project start - show from project start
+    offsetDays = 0;
+  }
+  
+  // Ensure offset doesn't exceed maximum
+  offsetDays = Math.min(offsetDays, maxOffset);
+} else {
+  // For admins, use the existing offset system
+  offsetDays = Math.min(getOffset(gi,pi), maxOffset);
+  setOffset(gi,pi, offsetDays);
+}
 
     const visibleStart = addDaysLocal(start, offsetDays);
     const visibleEnd   = addDaysLocal(visibleStart, viewportDays);
