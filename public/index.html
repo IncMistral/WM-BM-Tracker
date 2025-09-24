@@ -1425,6 +1425,21 @@ document.getElementById("btnViewLogs").onclick = () => {
   }
 };
 
+// Auto-switch logs when dropdown changes
+document.getElementById("logDropdown").onchange = () => {
+  const dd = document.getElementById("logDropdown");
+  if (!dd || !dd.value) return;
+
+  // Only auto-switch if logs are currently visible
+  if (logsVisible) {
+    const newDate = dd.value;
+    if (currentDate !== newDate) {
+      viewCompiledLogs(newDate);
+      currentDate = newDate;
+    }
+  }
+};
+
         document.getElementById("btnDeleteLogs").onclick = async () => {
           const dd = document.getElementById("logDropdown");
           if (!dd || !dd.value) {
