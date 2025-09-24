@@ -1026,20 +1026,34 @@ await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURICompon
   method: "DELETE"
 });
 
-// Also remove from local logs array
+// Also remove from local logs array - only logs for this specific date and group
 for (let i = logs.length - 1; i >= 0; i--) {
   const log = logs[i];
   if (log.date === selectedDate) {
-    // Check if this log belongs to this group
-    if (log.type === "group-create" || log.type === "group-delete" || 
-        !log.group || 
-        log.group.toLowerCase() === groupName.toLowerCase() || 
-        log.group.toLowerCase() === "unknowngroup") {
+    let shouldDelete = false;
+    
+    // Always delete group-create and group-delete for any group on this date
+    if (log.type === "group-create" || log.type === "group-delete") {
+      shouldDelete = true;
+    }
+    // Delete logs that belong to this specific group
+    else if (log.group && log.group.toLowerCase() === groupName.toLowerCase()) {
+      shouldDelete = true;
+    }
+    // Delete logs with unknown group only if they're on this date
+    else if (!log.group || log.group.toLowerCase() === "unknowngroup") {
+      shouldDelete = true;
+    }
+    
+    if (shouldDelete) {
       logs.splice(i, 1);
     }
   }
 }
 
+// Clear the UI and refresh
+document.getElementById("logContent").innerHTML = "";
+refreshLogDropdown(groupName);
 // Clear the UI and refresh
 document.getElementById("logContent").innerHTML = "";
 refreshLogDropdown(groupName);
