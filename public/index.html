@@ -1021,15 +1021,28 @@ document.getElementById("btnDeleteLogs").onclick = async () => {
 
   if (!confirm("Are you sure you want to delete ALL logs for " + groupName + " on " + selectedDate + "? This cannot be undone.")) return;
 
-  // Delete only logs for the specific date and group
-  await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(selectedDate), {
-    method: "DELETE"
-  });
+// Delete only logs for the specific date and group
+await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(selectedDate), {
+  method: "DELETE"
+});
 
-  // Clear the UI and refresh
-  document.getElementById("logContent").innerHTML = "";
-  refreshLogDropdown(groupName);
-};
+// Also remove from local logs array
+for (let i = logs.length - 1; i >= 0; i--) {
+  const log = logs[i];
+  if (log.date === selectedDate) {
+    // Check if this log belongs to this group
+    if (log.type === "group-create" || log.type === "group-delete" || 
+        !log.group || 
+        log.group.toLowerCase() === groupName.toLowerCase() || 
+        log.group.toLowerCase() === "unknowngroup") {
+      logs.splice(i, 1);
+    }
+  }
+}
+
+// Clear the UI and refresh
+document.getElementById("logContent").innerHTML = "";
+refreshLogDropdown(groupName);
 
         };
 
