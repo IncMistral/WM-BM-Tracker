@@ -2868,7 +2868,7 @@ function showReportPage(group) {
                 let delta = 0;
 
                 if (m.status === "completed") {
-                  // 🟢 Green: 0 if on/after due, negative if early
+                  // Green: 0 if on/after due, negative if early
                   const completed = m.completedOn ? parseLocalDate(m.completedOn) : today;
                   const d = diffDays(completed, dueDate);
                   delta = d < 0 ? d : 0;
@@ -2890,7 +2890,7 @@ function showReportPage(group) {
                 }
               }
 
-                const statusLabels = {
+              const statusLabels = {
                 incomplete: "In Progress",
                 overdue: "In Progress, Past Due",
                 completed: "Complete, On-Time/Early",
@@ -2920,7 +2920,7 @@ function showReportPage(group) {
                             <th style="width:20%;">Project</th>
                             <th style="width:15%;">Due Date</th>
                             <th style="width:15%;">Status</th>
-                            <th style="width:15%;">Δ</th>   <!-- or "Days" if you prefer -->
+                            <th style="width:15%;">Δ</th>
                           </tr>
                         </thead>
                        <tbody>${milestones}</tbody>
@@ -2936,6 +2936,14 @@ function showReportPage(group) {
   return html;
 }
 
+function goBack() {
+  document.getElementById("reportPage").style.display = "none";
+  document.getElementById("trackerWrapper").style.display = "block";
+}
+
+function startAutoRefresh() {
+  console.log("Auto-refresh would start here");
+}
 const gi = contextTarget.groupIndex;
 const g = groups[gi];
   (g.projects || []).forEach(p => {
