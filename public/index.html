@@ -191,6 +191,29 @@
     }
     .group-card.is-hovered{ background:#313131; box-shadow: 0 12px 24px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,0.12) inset; transform:translateY(-1px); }
 
+    /* Group maximize overlay */
+#groupMaximizeOverlay {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 48px);
+  background: #1e1e1e;
+  z-index: 1000;
+  display: none;
+  overflow: auto;
+}
+
+.group-maximized {
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.group-card {
+  cursor: pointer;
+}
+
     /* Clickable labels */
     .clickable { cursor:pointer; }
     .clickable:focus-visible{ outline: 2px solid rgba(0,172,193,.6); outline-offset:2px; }
@@ -413,6 +436,8 @@ async function showLogs() {
   let editingMemberIndex = null;
   let projectBarRegions = [];
   let currentUser = null;   // { username, role }
+  let maximizedGroupIndex = null;
+  let originalScrollPosition = 0;
   // Restore currentUser from localStorage if available
 const savedUser = localStorage.getItem("bm-currentUser");
 if (savedUser) {
@@ -703,6 +728,164 @@ function compileDailyLogs() {
     groupHoverHandlersAttached = true;
   }
 
+  /* ===================== GROUP MAXIMIZE/MINIMIZE ===================== */
+function maximizeGroup(groupIndex) {
+  if (maximizedGroupIndex === groupIndex) {
+    minimizeGroup();
+    return;
+  }
+
+  maximizedGroupIndex = groupIndex;
+  originalScrollPosition = document.getElementById('trackerWrapper').scrollTop;
+  
+  // Hide all other groups
+  const wrapper = document.getElementById('trackerWrapper');
+  const allElements = wrapper.children;
+  for (let el of allElements) {
+    if (!el.classList.contains('group-' + groupIndex)) {
+      el.classList.add('group-maximized');
+    }
+  }
+  
+  // Create/show overlay
+  let overlay = document.getElementById('groupMaximizeOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'groupMaximizeOverlay';
+    overlay.innerHTML = '<div id="maximizedGroupContent"></div>';
+    document.body.appendChild(overlay);
+    
+    overlay.addEventListener('dblclick', (e) => {
+      if (e.target === overlay || e.target.id === 'maximizedGroupContent') {
+        minimizeGroup();
+      }
+    });
+  }
+  
+  overlay.style.display = 'block';
+  renderMaximizedGroup(groupIndex);
+}
+
+function minimizeGroup() {
+  maximizedGroupIndex = null;
+  
+  const wrapper = document.getElementById('trackerWrapper');
+  const allElements = wrapper.children;
+  for (let el of allElements) {
+    el.classList.remove('group-maximized');
+  }
+  
+  const overlay = document.getElementById('groupMaximizeOverlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+  
+  wrapper.scrollTop = originalScrollPosition;
+}
+
+function renderMaximizedGroup(groupIndex) {
+  const overlay = document.getElementById('groupMaximizeOverlay');
+  const content = overlay.querySelector('#maximizedGroupContent');
+  if (!content) return;
+  
+  content.innerHTML = '';
+  content.style.position = 'relative';
+  content.style.width = '100%';
+  content.style.minHeight = '100%';
+  content.style.padding = '20px';
+  
+  const g = groups[groupIndex];
+  let y = 20;
+  
+  // Group title with minimize instruction
+  const title = document.createElement('div');
+  title.style.position = 'absolute';
+  title.style.left = '20px';
+  title.style.top = y + 'px';
+  title.style.fontSize = '2rem';
+  title.style.fontWeight = 'bold';
+  title.style.color = 'yellow';
+  title.textContent = g.name;
+  content.appendChild(title);
+  
+  const subtitle = document.createElement('div');
+  subtitle.style.position = 'absolute';
+  subtitle.style.left = '20px';
+  subtitle.style.top = (y + 40) + 'px';
+  subtitle.style.fontSize = '1rem';
+  subtitle.style.color = '#ccc';
+  subtitle.textContent = 'Double-click anywhere to minimize';
+  content.appendChild(subtitle);
+  
+  y += 100;
+  
+  // Team members
+  if (g.teamMembers && g.teamMembers.length > 0) {
+    const teamTitle = document.createElement('div');
+    teamTitle.style.position = 'absolute';
+    teamTitle.style.left = '20px';
+    teamTitle.style.top = y + 'px';
+    teamTitle.style.fontSize = '1.2rem';
+    teamTitle.style.fontWeight = 'bold';
+    teamTitle.style.color = 'white';
+    teamTitle.textContent = 'Team Members:';
+    content.appendChild(teamTitle);
+    y += 35;
+    
+    g.teamMembers.forEach(member => {
+      const memberEl = document.createElement('div');
+      memberEl.style.position = 'absolute';
+      memberEl.style.left = '40px';
+      memberEl.style.top = y + 'px';
+      memberEl.style.color = roleColors[member.role] || 'gray';
+      memberEl.style.fontWeight = 'bold';
+      memberEl.textContent = `${member.role}: ${member.name}`;
+      content.appendChild(memberEl);
+      y += 25;
+    });
+    y += 20;
+  }
+  
+  // Projects
+  (g.projects || []).forEach((p, pi) => {
+    const projTitle = document.createElement('div');
+    projTitle.style.position = 'absolute';
+    projTitle.style.left = '20px';
+    projTitle.style.top = y + 'px';
+    projTitle.style.fontSize = '1.1rem';
+    projTitle.style.fontWeight = 'bold';
+    projTitle.style.color = 'white';
+    projTitle.textContent = p.name;
+    content.appendChild(projTitle);
+    y += 30;
+    
+    const projDates = document.createElement('div');
+    projDates.style.position = 'absolute';
+    projDates.style.left = '40px';
+    projDates.style.top = y + 'px';
+    projDates.style.color = '#ccc';
+    projDates.textContent = `${p.startDate || 'No start'} → ${p.completionDate || 'No end'}`;
+    content.appendChild(projDates);
+    y += 25;
+    
+    // Milestones
+    if (p.milestones && p.milestones.length > 0) {
+      p.milestones.forEach(m => {
+        const milestone = document.createElement('div');
+        milestone.style.position = 'absolute';
+        milestone.style.left = '60px';
+        milestone.style.top = y + 'px';
+        milestone.style.color = '#aaa';
+        milestone.style.fontSize = '0.9rem';
+        milestone.textContent = `• ${m.label || 'Milestone'} - ${m.date || 'No date'} (${m.status || 'incomplete'})`;
+        content.appendChild(milestone);
+        y += 20;
+      });
+    }
+    y += 30;
+  });
+}
+
   /* ===================== RENDER TIMELINE ===================== */
 function render() {
   const wrapper = document.getElementById("trackerWrapper");
@@ -722,19 +905,27 @@ function render() {
     const labelGutter = 10;
     const barXBase = sidePad + labelColWidth + labelGutter;
 
-    // group background card (aligned to sidePad)
-    const groupStartY = y - 45;
-    const card = document.createElement('div');
-    card.className = 'group-card';
-    card.style.left   = sidePad + 'px';
-    card.style.top    = groupStartY + 'px';
-    card.style.width  = (wrapper.clientWidth - sidePad * 2) + 'px';
-    card.style.height = '1px';
-    wrapper.appendChild(card);
+// group background card (aligned to sidePad)
+const groupStartY = y - 45;
+const card = document.createElement('div');
+card.className = 'group-card group-' + gi;
+card.style.left   = sidePad + 'px';
+card.style.top    = groupStartY + 'px';
+card.style.width  = (wrapper.clientWidth - sidePad * 2) + 'px';
+card.style.height = '1px';
 
-    // team ribbon (unchanged)
-    const teamContainer = document.createElement("div");
-    teamContainer.className = "absolute";
+// Add double-click to maximize
+card.addEventListener('dblclick', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  maximizeGroup(gi);
+});
+
+wrapper.appendChild(card);
+
+// team ribbon (unchanged)
+const teamContainer = document.createElement("div");
+teamContainer.className = "absolute group-" + gi;
     teamContainer.style.left = "50%";
     teamContainer.style.top = (y - 40) + "px";
     teamContainer.style.transform = "translateX(-50%)";
@@ -766,7 +957,7 @@ function render() {
   
 // group label 
 const groupLabel = document.createElement("span");
-groupLabel.className = "absolute clickable";
+groupLabel.className = "absolute clickable group-" + gi;
 groupLabel.style.left = (sidePad + 10) + "px";   // 👈 label’s X position
 groupLabel.style.top = (y - 40) + "px";          // 👈 label’s Y position
 groupLabel.style.fontWeight = "700";
@@ -2456,6 +2647,11 @@ for (let i = 0; i < projectBarRegions.length; i++) {
 }
 
   document.addEventListener('contextmenu', (e) => e.preventDefault(), { passive: false });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && maximizedGroupIndex !== null) {
+    minimizeGroup();
+  }
+});
 
   /* ===================== LOGIN / USER PROFILE ===================== */
 // Restore session if it exists
