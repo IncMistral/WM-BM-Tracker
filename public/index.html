@@ -182,13 +182,14 @@
     #groupProjectList .proj-row input[type="checkbox"] { width:1rem; height:1rem; margin-left:0.5rem; }
 
     /* Group background card */
-    .group-card{
-      position:absolute; left:1rem;
-      background:#2b2b2b; border:1px solid var(--border); border-radius: var(--radius-md);
-      box-shadow: var(--shadow-2);
-      pointer-events:none;
-      transition:box-shadow .12s ease, transform .12s ease, background .12s ease;
-    }
+.group-card{
+  position:absolute; left:1rem;
+  background:#2b2b2b; border:1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  pointer-events:auto;  /* ← Changed from 'none' to 'auto' */
+  transition:box-shadow .12s ease, transform .12s ease, background .12s ease;
+  cursor: pointer;
+}
     .group-card.is-hovered{ background:#313131; box-shadow: 0 12px 24px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,0.12) inset; transform:translateY(-1px); }
 
     /* Group maximize overlay */
@@ -1322,7 +1323,7 @@ compileBtn.style.top = (y - 42) + "px";          // 👈 adjust this number to a
 compileBtn.style.fontSize = "0.7rem";
 compileBtn.style.padding = "2px 6px";
 compileBtn.style.cursor = "pointer";
-
+compileBtn.className = "group-" + gi;
 wrapper.appendChild(compileBtn);
 }
 
@@ -1330,7 +1331,7 @@ wrapper.appendChild(compileBtn);
 
   // project name
   const projName = document.createElement("span");
-  projName.className = "absolute";
+  projName.className = "absolute group-" + gi;
   projName.style.left = sidePad + "px";
   projName.style.top = (y + BAR_HEIGHT/2 - 28) + "px";
   projName.style.width = labelColWidth + "px";
@@ -1340,9 +1341,10 @@ wrapper.appendChild(compileBtn);
   projName.textContent = p.name;
   wrapper.appendChild(projName);
 
-  // PO number display
+// PO number display
 if (p.poNumber) {
   const poNumber = document.createElement("span");
+  poNumber.className = "absolute group-" + gi;
   poNumber.className = "absolute";
   poNumber.style.left = sidePad + "px";
   poNumber.style.top = (y + BAR_HEIGHT/2 - 5) + "px";  // Position below project name
@@ -1354,10 +1356,10 @@ if (p.poNumber) {
   wrapper.appendChild(poNumber);
 }
 
-  // start date label
+// start date label
   if (p.startDate) {
     const startLabel = document.createElement("span");
-    startLabel.className = "absolute";
+    startLabel.className = "absolute group-" + gi;
     startLabel.style.left = (barXBase + 65) + "px";
     startLabel.style.top  = (y - 10) + "px";
     startLabel.style.transform = "translateX(-100%) translateY(-50%)";
@@ -1385,9 +1387,9 @@ if (window.screen.width >= 3840) {
 
 const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
 
-  // bar + border
+// bar + border
   const bar = document.createElement("div");
-  bar.className = "bar";
+  bar.className = "bar group-" + gi;
   bar.style.left = barX + "px";
   bar.style.top = y + "px";
   bar.style.width = barW + "px";
@@ -1406,8 +1408,8 @@ const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
     y2: y + BAR_HEIGHT
   });
 
-  const border = document.createElement("div");
-  border.className = "bar-border";
+const border = document.createElement("div");
+  border.className = "bar-border group-" + gi;
   border.style.left = barX + "px";
   border.style.top = y + "px";
   border.style.width = barW + "px";
@@ -1440,8 +1442,8 @@ const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
     const progress = Math.max(0, Math.min(1, (nowClamped - visibleStart) / (visibleEnd - visibleStart)));
     const fillW = barW * progress;
 
-    const fill = document.createElement("div");
-    fill.className = "bar-fill";
+const fill = document.createElement("div");
+    fill.className = "bar-fill group-" + gi;
     fill.style.left = barX + "px";
     fill.style.top  = y + "px";
     fill.style.width = fillW + "px";
@@ -1467,8 +1469,8 @@ if (Array.isArray(p.milestones)) {
       const ratio = (d - visibleStart) / (visibleEnd - visibleStart);
       const mx = barX + ratio * barW;
 
-      const ms = document.createElement("div");
-      ms.className = "milestone";
+const ms = document.createElement("div");
+      ms.className = "milestone group-" + gi;
       ms.style.left = mx + "px";
       ms.style.top  = y + "px";
       ms.style.width = cellW + "px";
@@ -1506,7 +1508,8 @@ if (Array.isArray(p.milestones)) {
       wrapper.appendChild(ms);
 
       // Label + date
-      const labelWrap = document.createElement("div");
+const labelWrap = document.createElement("div");
+      labelWrap.className = "group-" + gi;
       labelWrap.style.position = "absolute";
       labelWrap.style.left = (mx + cellW / 2) + "px";
       labelWrap.style.top  = (y + BAR_HEIGHT + 4) + "px";
@@ -1537,8 +1540,8 @@ if (Array.isArray(p.milestones)) {
       const dayOfWeek = curDate.getDay();
       const x = barX + (i / viewportDays) * barW;
 
-      const tick = document.createElement("div");
-      tick.className = "absolute tick";
+const tick = document.createElement("div");
+      tick.className = "absolute tick group-" + gi;
       tick.style.left = x + "px";
       tick.style.top = y + "px";
       tick.style.width = "1px";
@@ -1547,8 +1550,8 @@ if (Array.isArray(p.milestones)) {
       wrapper.appendChild(tick);
 
       if (i < viewportDays) {
-        const label = document.createElement("div");
-        label.className = "dayLetter";
+ const label = document.createElement("div");
+        label.className = "dayLetter group-" + gi;
         label.style.left = (x + cellW / 2) + "px";
         label.style.top  = (y + BAR_HEIGHT / 2) + "px";
 
@@ -1561,8 +1564,8 @@ if (Array.isArray(p.milestones)) {
       }
 
       if (i < viewportDays && (dayOfWeek === 0 || dayOfWeek === 6)) {
-        const weekend = document.createElement("div");
-        weekend.className = "absolute weekendHatch";
+const weekend = document.createElement("div");
+        weekend.className = "absolute weekendHatch group-" + gi;
         weekend.style.left = x + "px";
         weekend.style.top  = y + "px";
         weekend.style.width = cellW + "px";
@@ -1576,8 +1579,8 @@ if (Array.isArray(p.milestones)) {
       const today = new Date();
       const end = new Date(p.completionDate);
       const diff = Math.max(0, Math.ceil((end - today) / (1000*60*60*24)));
-      const comp = document.createElement("div");
-      comp.className = "completion";
+const comp = document.createElement("div");
+      comp.className = "completion group-" + gi;
       comp.style.left = (barX + barW - 120) + "px";
       comp.style.top = (y - 16) + "px";
       comp.style.fontSize = "0.8rem";
