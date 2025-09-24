@@ -1399,24 +1399,31 @@ const logsForDate = logs.filter(l => {
         }
 
 document.getElementById("btnViewLogs").onclick = () => {
-          const dd = document.getElementById("logDropdown");
-          if (!dd || !dd.value) return;
+  const dd = document.getElementById("logDropdown");
+  if (!dd || !dd.value) return;
 
-          const date = dd.value;
-          const container = document.getElementById("logContent");
+  const date = dd.value;
+  const container = document.getElementById("logContent");
 
-          if (!logsVisible || currentDate !== date) {
-            viewCompiledLogs(date);
-            logsVisible = true;
-            currentDate = date;
-            document.getElementById("btnViewLogs").textContent = "Hide Logs";
-          } else {
-            container.innerHTML = "";
-            logsVisible = false;
-            currentDate = null;
-            document.getElementById("btnViewLogs").textContent = "View Logs";
-          }
-        };
+  if (!logsVisible) {
+    // First time viewing logs
+    viewCompiledLogs(date);
+    logsVisible = true;
+    currentDate = date;
+    document.getElementById("btnViewLogs").textContent = "Hide Logs";
+  } else if (currentDate !== date) {
+    // Different date selected - switch to new logs
+    viewCompiledLogs(date);
+    currentDate = date;
+    // Keep button as "Hide Logs" since logs are still visible
+  } else {
+    // Same date clicked - toggle visibility
+    container.innerHTML = "";
+    logsVisible = false;
+    currentDate = null;
+    document.getElementById("btnViewLogs").textContent = "View Logs";
+  }
+};
 
         document.getElementById("btnDeleteLogs").onclick = async () => {
           const dd = document.getElementById("logDropdown");
