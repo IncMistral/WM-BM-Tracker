@@ -929,9 +929,175 @@ function renderMaximizedGroup(groupIndex) {
     border.style.height = BAR_HEIGHT + "px";
     content.appendChild(border);
 
-    // Copy the rest of your timeline rendering logic here (fill, milestones, ticks, etc.)
-    // This includes all the date calculations, progress bars, milestones, day labels, etc.
-    // from your existing render() function for this project
+// fill, milestones, ticks
+if (p.startDate && p.completionDate) {
+  const start = parseLocalDate(p.startDate);
+  const end   = parseLocalDate(p.completionDate);
+
+  const totalDays = Math.max(1, Math.ceil(
+    (Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()) -
+     Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) / DAY_MS
+  ));
+
+  const zoomDays = projectZoomLevels[`${groupIndex}-${pi}`] || 15;
+  const viewportDays = Math.min(totalDays, zoomDays);
+  const maxOffset = Math.max(0, totalDays - viewportDays);
+
+  let offsetDays = Math.min(getOffset(groupIndex,pi), maxOffset);
+  setOffset(groupIndex,pi, offsetDays);
+
+  const visibleStart = addDaysLocal(start, offsetDays);
+  const visibleEnd   = addDaysLocal(visibleStart, viewportDays);
+  const cellW = barW / viewportDays;
+
+  const now = new Date();
+  const nowClamped = now < visibleStart ? visibleStart : (now > visibleEnd ? visibleEnd : now);
+  const progress = Math.max(0, Math.min(1, (nowClamped - visibleStart) / (visibleEnd - visibleStart)));
+  const fillW = barW * progress;
+
+  const fill = document.createElement("div");
+  fill.className = "bar-fill";
+  fill.style.left = barX + "px";
+  fill.style.top  = y + "px";
+  fill.style.width = fillW + "px";
+  fill.style.height = BAR_HEIGHT + "px";
+  content.appendChild(fill);
+
+  // drag to pan
+  if (totalDays > zoomDays) {
+    const startDragHandler = (evt) => startDrag(evt, groupIndex, pi, barW, totalDays);
+    bar.classList.add('draggable');  bar.onmousedown = startDragHandler;
+    fill.classList.add('draggable'); fill.onmousedown = startDragHandler;
+  } else {
+    bar.classList.remove('draggable');  bar.onmousedown = null;
+    fill.classList.remove('draggable'); fill.onmousedown = null;
+  }
+
+  // milestones FIRST
+  if (Array.isArray(p.milestones)) {
+    p.milestones.forEach(m => {
+      if (!m?.date) return;
+      const d = parseLocalDate(m.date);
+      if (d >= visibleStart && d <= visibleEnd) {
+        const ratio = (d - visibleStart) / (visibleEnd - visibleStart);
+        const mx = barX + ratio * barW;
+
+        const ms = document.createElement("div");
+        ms.className = "milestone";
+        ms.style.left = mx + "px";
+        ms.style.top  = y + "px";
+        ms.style.width = cellW + "px";
+        ms.style.height = BAR_HEIGHT + "px";
+
+        // Auto status update based on due date unless completed
+        if (m.date) {
+          const dueDate = parseLocalDate(m.date);
+          const today = new Date();
+
+          if (m.status === "completed" || m.status === "completedLate") {
+            // keep completed states as-is
+          } else {
+            if (today > endOfDay(dueDate)) {
+              m.status = "overdue";
+            } else {
+              m.status = "incomplete";
+            }
+          }
+        }
+
+        // Apply colors based on status
+        switch (m.status) {
+          case 'incomplete':    ms.style.background = "orange"; break;
+          case 'overdue':       ms.style.background = "red"; break;
+          case 'completedLate': ms.style.background =
+            "repeating-linear-gradient(45deg, red, red 4px, limegreen 4px, limegreen 8px)";
+            break;
+          case 'completed':     ms.style.background = "limegreen"; break;
+          default:
+            ms.style.background = "orange";
+            m.status = "incomplete";
+        }
+        content.appendChild(ms);
+
+        // Label + date
+        const labelWrap = document.createElement("div");
+        labelWrap.style.position = "absolute";
+        labelWrap.style.left = (mx + cellW / 2) + "px";
+        labelWrap.style.top  = (y + BAR_HEIGHT + 4) + "px";
+        labelWrap.style.transform = "translateX(-50%)";
+        labelWrap.style.display = "flex";
+        labelWrap.style.flexDirection = "column";
+        labelWrap.style.alignItems = "center";
+        labelWrap.style.gap = "2px";
+
+        const lbl = document.createElement("div");
+        lbl.className = "milestone-label";
+        lbl.textContent = m.label || "";
+
+        const dateLbl = document.createElement("div");
+        dateLbl.className = "milestone-date";
+        
+        labelWrap.appendChild(lbl);
+        labelWrap.appendChild(dateLbl);
+        content.appendChild(labelWrap);
+      }
+    });
+  }
+
+  // ticks + labels LAST
+  for (let i = 0; i <= viewportDays; i++) {
+    const curDate   = addDaysLocal(visibleStart, i);
+    const dayOfWeek = curDate.getDay();
+    const x = barX + (i / viewportDays) * barW;
+
+    const tick = document.createElement("div");
+    tick.className = "absolute tick";
+    tick.style.left = x + "px";
+    tick.style.top = y + "px";
+    tick.style.width = "1px";
+    tick.style.height = BAR_HEIGHT + "px";
+    tick.style.background = "rgba(0,0,0,0.1)";
+    content.appendChild(tick);
+
+    if (i < viewportDays) {
+      const label = document.createElement("div");
+      label.className = "dayLetter";
+      label.style.left = (x + cellW / 2) + "px";
+      label.style.top  = (y + BAR_HEIGHT / 2) + "px";
+
+      const month = curDate.getMonth() + 1;
+      const date  = curDate.getDate();
+      const dow   = ['S','M','T','W','T','F','S'][dayOfWeek];
+
+      label.innerHTML = `<div>${dow}</div><div style="font-size:0.75rem;">${month}/${String(date).padStart(2,"0")}</div>`;
+      content.appendChild(label);
+    }
+
+    if (i < viewportDays && (dayOfWeek === 0 || dayOfWeek === 6)) {
+      const weekend = document.createElement("div");
+      weekend.className = "absolute weekendHatch";
+      weekend.style.left = x + "px";
+      weekend.style.top  = y + "px";
+      weekend.style.width = cellW + "px";
+      weekend.style.height = BAR_HEIGHT + "px";
+      content.appendChild(weekend);
+    }
+  }
+
+  // completion countdown
+  if (p.completionDate) {
+    const today = new Date();
+    const end = new Date(p.completionDate);
+    const diff = Math.max(0, Math.ceil((end - today) / (1000*60*60*24)));
+    const comp = document.createElement("div");
+    comp.className = "completion";
+    comp.style.left = (barX + barW - 120) + "px";
+    comp.style.top = (y - 16) + "px";
+    comp.style.fontSize = "0.8rem";
+    comp.textContent = `${p.completionDate} | T - ${diff}`;
+    content.appendChild(comp);
+  }
+} // end if dates exist
 
     y += BAR_HEIGHT + GAP;
   });
