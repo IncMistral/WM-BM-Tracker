@@ -1005,23 +1005,30 @@ const logsForDate = logs.filter(l => {
             document.getElementById("btnViewLogs").textContent = "View Logs";
           }
 
-          document.getElementById("btnDeleteLogs").onclick = async () => {
+document.getElementById("btnDeleteLogs").onclick = async () => {
+  const dd = document.getElementById("logDropdown");
+  if (!dd || !dd.value) {
+    alert("Please select a log date to delete.");
+    return;
+  }
+  
+  const selectedDate = dd.value;
   const password = prompt("Enter password to delete logs:");
   if (password !== "guest820") {
     alert("Incorrect password. Logs were not deleted.");
     return;
   }
 
-  if (!confirm("Are you sure you want to delete ALL logs for this group?")) return;
+  if (!confirm("Are you sure you want to delete ALL logs for " + groupName + " on " + selectedDate + "? This cannot be undone.")) return;
 
-  // 🔴 Call the new endpoint (delete all logs for this group, any date)
-  await fetch("/api/logs/" + encodeURIComponent(groupName), {
+  // Delete only logs for the specific date and group
+  await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(selectedDate), {
     method: "DELETE"
   });
 
-  // Clear the UI
-  refreshLogDropdown(groupName);
+  // Clear the UI and refresh
   document.getElementById("logContent").innerHTML = "";
+  refreshLogDropdown(groupName);
 };
 
         };
