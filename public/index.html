@@ -509,6 +509,40 @@ function endOfDay(date) {
   return d;
 }
 
+function endOfDay(date) {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+function checkForMonthChange() {
+  if (currentUser?.role !== "user") return;
+  
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  // Store last known month in a global variable
+  if (window.lastKnownMonth === undefined) {
+    window.lastKnownMonth = currentMonth;
+    window.lastKnownYear = currentYear;
+    return;
+  }
+  
+  // Check if month changed
+  if (currentMonth !== window.lastKnownMonth || currentYear !== window.lastKnownYear) {
+    window.lastKnownMonth = currentMonth;
+    window.lastKnownYear = currentYear;
+    render(); // Re-render to show new month
+  }
+}
+
+function startMonthChangeDetection() {
+  if (currentUser?.role !== "user") return;
+  // Check every hour for month changes
+  setInterval(checkForMonthChange, 60 * 60 * 1000);
+}
+
 /* ===================== LOGGING ===================== */
 function addLogEntry(groupName, type, details) {
   // Try to resolve to a valid group in `groups`
@@ -2665,8 +2699,9 @@ function handleLogin() {
   document.getElementById("screenOverlay").style.display = "none";
   closeModal('loginModal');
 
-      // Start auto-refresh after successful login
+  // Start auto-refresh after successful login
   startAutoRefresh();
+  startMonthChangeDetection();
 }
 
   function handleLogout() {
@@ -2925,6 +2960,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Start auto-refresh if user is already logged in on page load
   startAutoRefresh();
+  startMonthChangeDetection();
 
     // Auto-refresh timeline on first of month for users
     if (currentUser?.role === "user") {
