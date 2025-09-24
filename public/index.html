@@ -840,11 +840,11 @@ teamContainer.className = "absolute group-" + gi;
 
       const roleEl = document.createElement("div");
       roleEl.className = "teamRole";
-      roleEl.style.color = (roleColors[member.role] || "gray");
+      roleEl.style.color = "#000000";
       roleEl.textContent = member.role;
 
       const nameEl = document.createElement("div");
-      nameEl.style.color = "white";
+      nameEl.style.color = "000000";
       nameEl.style.fontSize = "0.75rem";
       nameEl.textContent = member.name;
 
@@ -861,7 +861,7 @@ groupLabel.style.left = (sidePad + 10) + "px";   // 👈 label’s X position
 groupLabel.style.top = (y - 40) + "px";          // 👈 label’s Y position
 groupLabel.style.fontWeight = "700";
 groupLabel.style.fontSize = "1rem";
-groupLabel.style.color = "yellow";
+groupLabel.style.color = "#000000";
 groupLabel.textContent = g.name;
 groupLabel.setAttribute("role", "button");
 groupLabel.setAttribute("tabindex", "0");
@@ -1257,7 +1257,7 @@ wrapper.appendChild(compileBtn);
   projName.style.width = labelColWidth + "px";
   projName.style.textAlign = "right";
   projName.style.fontSize = ".75rem";
-  projName.style.color = "white";
+  projName.style.color = "#000000";
   projName.textContent = p.name;
   wrapper.appendChild(projName);
 
@@ -1271,7 +1271,7 @@ if (p.poNumber) {
   poNumber.style.width = labelColWidth + "px";
   poNumber.style.textAlign = "right";
   poNumber.style.fontSize = "0.75rem";
-  poNumber.style.color = "#ccc";  // Slightly dimmed color
+  poNumber.style.color = "#000000";  // Slightly dimmed color
   poNumber.textContent = "" + p.poNumber;
   wrapper.appendChild(poNumber);
 }
@@ -1284,7 +1284,7 @@ if (p.poNumber) {
     startLabel.style.top  = (y - 10) + "px";
     startLabel.style.transform = "translateX(-100%) translateY(-50%)";
     startLabel.style.fontSize = "0.8rem";
-    startLabel.style.color = "#ccc";
+    startLabel.style.color = "#000000";
     startLabel.textContent = p.startDate;
     wrapper.appendChild(startLabel);
   }
