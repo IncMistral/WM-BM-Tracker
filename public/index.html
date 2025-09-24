@@ -2188,7 +2188,25 @@ function renderMilestoneList(gi, pi) {
   const g = groups[gi];
 const p = g?.projects?.[pi];
 
-  (p?.milestones || []).forEach((m, mi) => {
+ // Sort milestones by date, putting those without dates at the end
+const sortedMilestones = (p?.milestones || []).map((milestone, index) => ({
+  ...milestone,
+  originalIndex: index
+})).sort((a, b) => {
+  const dateA = a.date || a.startDate;
+  const dateB = b.date || b.startDate;
+  
+  // Put milestones without dates at the end
+  if (!dateA && !dateB) return 0;
+  if (!dateA) return 1;
+  if (!dateB) return -1;
+  
+  // Sort by date
+  return new Date(dateA) - new Date(dateB);
+});
+
+sortedMilestones.forEach((m, displayIndex) => {
+  const mi = m.originalIndex; // Use original index for editing/deleting
     const row = document.createElement('div');
 
     // --- Milestone label ---
