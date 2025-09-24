@@ -1976,6 +1976,12 @@ if (idx == null || idx === '') {
     const g = groups[gi];
     const p = (pi == null || pi === undefined) ? { name:'', startDate:'', completionDate:'', milestones:[] } : g.projects[pi];
 
+    // Set modal title based on whether editing or adding
+const modalTitle = document.getElementById('projectModalTitle');
+if (modalTitle) {
+  modalTitle.textContent = (pi != null && pi !== undefined) ? "EDIT PROJECT" : "ADD PROJECT";
+}
+
     const nameInp = document.getElementById('projectNameInput');
     const start   = document.getElementById('projectStartDate');
     const comp    = document.getElementById('projectCompletionDate');
