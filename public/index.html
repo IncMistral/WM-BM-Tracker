@@ -1262,7 +1262,7 @@ const logsForDate = logs.filter(l => {
     l.group.toLowerCase() === groupName.toLowerCase() ||
     l.group.toLowerCase() === "unknowngroup"
   );
-}).sort((a, b) => a.ts - b.ts);
+}).sort((a, b) => b.ts - a.ts);
 
 
           const container = document.getElementById("logContent");
