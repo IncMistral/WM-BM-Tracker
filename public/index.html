@@ -1709,11 +1709,19 @@ const border = document.createElement("div");
       const monthDays = Math.ceil((monthEnd - monthStart) / DAY_MS) + 1;
       zoomDays = monthDays;
     }
-    const viewportDays = Math.min(totalDays, zoomDays);
+
+const viewportDays = Math.min(totalDays, zoomDays);
     const maxOffset = Math.max(0, totalDays - viewportDays);
 
-    let offsetDays = Math.min(getOffset(gi,pi), maxOffset);
-    setOffset(gi,pi, offsetDays);
+    let offsetDays;
+    if (currentUser?.role === "user") {
+      // For users, always start from the beginning of the month (no offset)
+      offsetDays = 0;
+    } else {
+      // For admins, use the existing offset system
+      offsetDays = Math.min(getOffset(gi,pi), maxOffset);
+      setOffset(gi,pi, offsetDays);
+    }
 
     const visibleStart = addDaysLocal(start, offsetDays);
     const visibleEnd   = addDaysLocal(visibleStart, viewportDays);
@@ -1732,8 +1740,8 @@ const fill = document.createElement("div");
     fill.style.height = BAR_HEIGHT + "px";
     wrapper.appendChild(fill);
 
-    // drag to pan
-    if (totalDays > zoomDays) {
+// drag to pan (disabled for users)
+    if (totalDays > zoomDays && currentUser?.role === "admin") {
       const startDragHandler = (evt) => startDrag(evt, gi, pi, barW, totalDays);
       bar.classList.add('draggable');  bar.onmousedown = startDragHandler;
       fill.classList.add('draggable'); fill.onmousedown = startDragHandler;
@@ -2893,6 +2901,9 @@ if (wrapper) {
   wrapper.addEventListener("wheel", (e) => {
     if (e.ctrlKey) return; // let ctrl+wheel for browser zoom pass through
     e.preventDefault();
+    
+    // Disable zoom for users
+    if (currentUser?.role === "user") return;
 
     // Figure out which group card the mouse is over
     const r = wrapper.getBoundingClientRect();
