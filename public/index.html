@@ -831,11 +831,22 @@ newTab.document.write(`
       <!-- Daily logs output -->
       <div id="logContent" style="margin-top:1rem;"></div>
 
-      <script>
-        // The group name is baked into this page
+// The group name is baked into this page
         const groupName = ${JSON.stringify(g.name)};
-        // Inject logs into this new tab
-        const logs = ${JSON.stringify(logs)};
+        // Fetch fresh logs from server instead of using stale local data
+        let logs = [];
+        
+        // Fetch logs from server on page load
+        async function loadFreshLogs() {
+          try {
+            const res = await fetch("/api/logs");
+            logs = await res.json();
+            console.log("Loaded fresh logs from server:", logs.length);
+          } catch (err) {
+            console.error("Failed to load logs:", err);
+            logs = [];
+          }
+        }
 
         // Render logs for a given date
         function viewCompiledLogs(date) {
@@ -1056,11 +1067,13 @@ document.getElementById("btnViewLogs").onclick = () => {
             alert("Failed to delete logs. Please try again.");
           }
         };
-        document.addEventListener("DOMContentLoaded", () => {
+        
+document.addEventListener("DOMContentLoaded", async () => {
+          await loadFreshLogs(); // Load fresh logs first
           refreshLogDropdown(groupName);
           console.log("✅ Dropdown initialized for", groupName);
         });
-
+        
         document.getElementById("btnExportLogs").onclick = function () {
           var dd = document.getElementById("logDropdown");
           if (!dd || !dd.value) {
