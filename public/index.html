@@ -1005,58 +1005,24 @@ const logsForDate = logs.filter(l => {
             document.getElementById("btnViewLogs").textContent = "View Logs";
           }
 
-document.getElementById("btnDeleteLogs").onclick = async () => {
-  const dd = document.getElementById("logDropdown");
-  if (!dd || !dd.value) {
-    alert("Please select a log date to delete.");
-    return;
-  }
-  
-  const selectedDate = dd.value;
+          document.getElementById("btnDeleteLogs").onclick = async () => {
   const password = prompt("Enter password to delete logs:");
   if (password !== "guest820") {
     alert("Incorrect password. Logs were not deleted.");
     return;
   }
 
-  if (!confirm("Are you sure you want to delete ALL logs for " + groupName + " on " + selectedDate + "? This cannot be undone.")) return;
+  if (!confirm("Are you sure you want to delete ALL logs for this group?")) return;
 
-// Delete only logs for the specific date and group
-await fetch("/api/logs/" + encodeURIComponent(groupName) + "/" + encodeURIComponent(selectedDate), {
-  method: "DELETE"
-});
+  // 🔴 Call the new endpoint (delete all logs for this group, any date)
+  await fetch("/api/logs/" + encodeURIComponent(groupName), {
+    method: "DELETE"
+  });
 
-// Also remove from local logs array - only logs for this specific date and group
-for (let i = logs.length - 1; i >= 0; i--) {
-  const log = logs[i];
-  if (log.date === selectedDate) {
-    let shouldDelete = false;
-    
-    // Always delete group-create and group-delete for any group on this date
-    if (log.type === "group-create" || log.type === "group-delete") {
-      shouldDelete = true;
-    }
-    // Delete logs that belong to this specific group
-    else if (log.group && log.group.toLowerCase() === groupName.toLowerCase()) {
-      shouldDelete = true;
-    }
-    // Delete logs with unknown group only if they're on this date
-    else if (!log.group || log.group.toLowerCase() === "unknowngroup") {
-      shouldDelete = true;
-    }
-    
-    if (shouldDelete) {
-      logs.splice(i, 1);
-    }
-  }
-}
-
-// Clear the UI and refresh
-document.getElementById("logContent").innerHTML = "";
-refreshLogDropdown(groupName);
-// Clear the UI and refresh
-document.getElementById("logContent").innerHTML = "";
-refreshLogDropdown(groupName);
+  // Clear the UI
+  refreshLogDropdown(groupName);
+  document.getElementById("logContent").innerHTML = "";
+};
 
         };
 
@@ -2868,7 +2834,7 @@ function showReportPage(group) {
                 let delta = 0;
 
                 if (m.status === "completed") {
-                  // Green: 0 if on/after due, negative if early
+                  // 🟢 Green: 0 if on/after due, negative if early
                   const completed = m.completedOn ? parseLocalDate(m.completedOn) : today;
                   const d = diffDays(completed, dueDate);
                   delta = d < 0 ? d : 0;
@@ -2890,7 +2856,7 @@ function showReportPage(group) {
                 }
               }
 
-              const statusLabels = {
+                const statusLabels = {
                 incomplete: "In Progress",
                 overdue: "In Progress, Past Due",
                 completed: "Complete, On-Time/Early",
@@ -2920,7 +2886,7 @@ function showReportPage(group) {
                             <th style="width:20%;">Project</th>
                             <th style="width:15%;">Due Date</th>
                             <th style="width:15%;">Status</th>
-                            <th style="width:15%;">Δ</th>
+                            <th style="width:15%;">Δ</th>   <!-- or "Days" if you prefer -->
                           </tr>
                         </thead>
                        <tbody>${milestones}</tbody>
@@ -2936,14 +2902,6 @@ function showReportPage(group) {
   return html;
 }
 
-function goBack() {
-  document.getElementById("reportPage").style.display = "none";
-  document.getElementById("trackerWrapper").style.display = "block";
-}
-
-function startAutoRefresh() {
-  console.log("Auto-refresh would start here");
-}
 const gi = contextTarget.groupIndex;
 const g = groups[gi];
   (g.projects || []).forEach(p => {
