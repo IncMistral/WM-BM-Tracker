@@ -306,6 +306,27 @@ body {
 }
     .row { display: flex; gap: 0.5rem; }
 
+    .row { display: flex; gap: 0.5rem; }
+
+#milestoneLegend {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+#milestoneLegend span {
+  color: #000000;
+}
+
+/* Hide legend on smaller screens */
+@media (max-width: 1200px) {
+  #milestoneLegend {
+    display: none !important;
+  }
+}
+
+  </style>
+</head>
+
   </style>
 </head>
 <body>
@@ -315,7 +336,36 @@ body {
   <img src="./Mistral_Logo.jpg" alt="Mistral Inc. logo" class="logo" />
   <button id="btnNewGroup" aria-label="+ New Group">+ New Group</button>
 
-<div id="topBar-spacer"></div>
+  <!-- Milestone Legend -->
+  <div id="milestoneLegend" style="display: flex; align-items: center; gap: 15px; margin-left: auto; margin-right: 20px; font-size: 0.75rem;">
+    <span style="font-weight: bold; color: #000;">Milestone Status:</span>
+    
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <div style="width: 12px; height: 12px; background: #63f298; border-radius: 2px;"></div>
+      <span>30+ Days</span>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <div style="width: 12px; height: 12px; background: orange; border-radius: 2px;"></div>
+      <span>1-30 Days</span>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <div style="width: 12px; height: 12px; background: #a3d7d9; border-radius: 2px;"></div>
+      <span>Due Today</span>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <div style="width: 12px; height: 12px; background: red; border-radius: 2px;"></div>
+      <span>Overdue</span>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <div style="width: 12px; height: 12px; background: white; border: 2px solid black; border-radius: 2px;"></div>
+      <span>Complete</span>
+    </div>
+  </div>
+
   <button id="btnLogin" aria-label="Login">Login</button>
   <button id="btnEditUser" style="display:none;" aria-label="Edit Users">Edit User</button>
 </div>
