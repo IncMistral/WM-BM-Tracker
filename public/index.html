@@ -1479,19 +1479,26 @@ sortedMilestones.forEach((m, mi) => {
       const diffTime = dueDate - today;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      if (diffDays > 30) {
-        daysText = `${diffDays} Days Remaining`;
-        backgroundColor = "#63f298";
-      } else if (diffDays > 0) {
-        daysText = `${diffDays} Days Remaining`;
-        backgroundColor = "orange";
-      } else if (diffDays === 0) {
-        daysText = "Due Today";
-        backgroundColor = "#a3d7d9";
-        pulseClass = " milestone-pulse";
+      // Check if milestone is completed first
+      if (m.status === 'completed') {
+        daysText = "Complete";
+        backgroundColor = "white";
       } else {
-        daysText = `${Math.abs(diffDays)} Days Overdue`;
-        backgroundColor = "red";
+        // Original logic for incomplete milestones
+        if (diffDays > 30) {
+          daysText = `${diffDays} Days Remaining`;
+          backgroundColor = "#63f298";
+        } else if (diffDays > 0) {
+          daysText = `${diffDays} Days Remaining`;
+          backgroundColor = "orange";
+        } else if (diffDays === 0) {
+          daysText = "Due Today";
+          backgroundColor = "#a3d7d9";
+          pulseClass = " milestone-pulse";
+        } else {
+          daysText = `${Math.abs(diffDays)} Days Overdue`;
+          backgroundColor = "red";
+        }
       }
     }
 // Milestone Colored Box
@@ -1511,6 +1518,10 @@ ms.style.color = "black";
 ms.style.fontWeight = "bold";
 ms.style.textAlign = "center";
 ms.style.background = backgroundColor;
+ms.style.background = backgroundColor;
+if (m.status === 'completed') {
+  ms.style.border = "2px solid black";
+}
 ms.style.borderRadius = "4px";
 ms.style.padding = "4px";
 
@@ -1957,6 +1968,34 @@ const isUpcoming = dueDate && today <= dueDate;
 if (!m.status) {
   m.status = isUpcoming ? 'incomplete' : 'overdue';
 }
+
+    // --- Toggle Complete button ---
+    const toggle = document.createElement('button');
+    toggle.textContent = (m.status === 'completed') ? 'Mark Incomplete' : 'Mark Complete';
+    toggle.style.backgroundColor = (m.status === 'completed') ? '#198754' : '#0d6efd';
+    toggle.addEventListener('click', () => {
+      const oldStatus = m.status || 'incomplete';
+      const newStatus = (oldStatus === 'completed') ? 'incomplete' : 'completed';
+      
+      // Update milestone status
+      p.milestones[mi].status = newStatus;
+      
+      // Log the status change
+      addLogEntry(g.name, "milestone-status-change", {
+        groupIndex: gi,
+        projectIndex: pi,
+        milestoneIndex: mi,
+        label: m.label || "",
+        from: oldStatus,
+        to: newStatus
+      });
+      
+      // Save and refresh
+      saveData();
+      renderMilestoneList(gi, pi);
+      render();
+    });
+    row.appendChild(toggle);
 
     // --- Delete button ---
     const del = document.createElement('button');
