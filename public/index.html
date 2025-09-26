@@ -2079,12 +2079,12 @@ if (idx == null || idx === '') {
     contextTarget = { groupIndex: gi, projectIndex: pi };
     const g = groups[gi];
 
-    const defaultMilestones = [
-  { label: "Design Review", date: "", status: "incomplete" },
-  { label: "Material Procurement", date: "", status: "incomplete" },
-  { label: "Fabrication Complete", date: "", status: "incomplete" },
-  { label: "Installation Complete", date: "", status: "incomplete" },
-  { label: "Final Inspection", date: "", status: "incomplete" }
+const defaultMilestones = [
+  { label: "KICKOFF", date: "", status: "incomplete" },
+  { label: "WELD QC", date: "", status: "incomplete" },
+  { label: "PAINT QC", date: "", status: "incomplete" },
+  { label: "FINAL QC", date: "", status: "incomplete" },
+  { label: "PREP FOR SHIP", date: "", status: "incomplete" }
 ];
 
 const p = (pi == null || pi === undefined) ? { 
