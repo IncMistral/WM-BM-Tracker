@@ -2125,13 +2125,6 @@ if (pi != null && pi !== undefined) {
 
           if (btnSave) {
        btnSave.onclick = () => {
-const defaultMilestones = [
-  { label: "KICKOFF", date: "", status: "incomplete" },
-  { label: "WELD QC", date: "", status: "incomplete" },
-  { label: "PAINT QC", date: "", status: "incomplete" },
-  { label: "FINAL QC", date: "", status: "incomplete" },
-  { label: "PREP FOR SHIP", date: "", status: "incomplete" }
-];
 
 const payload = {
   name: (nameInp instanceof HTMLInputElement) ? (nameInp.value.trim() || 'Project') : 'Project',
