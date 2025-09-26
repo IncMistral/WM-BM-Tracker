@@ -872,25 +872,25 @@ teamContainer.className = "absolute group-" + gi;
     teamContainer.style.display = "flex";
     teamContainer.style.gap = "16px";
     (g.teamMembers || []).forEach((member) => {
-      const box = document.createElement("div");
-      box.style.display = "flex";
-      box.style.flexDirection = "column";
-      box.style.alignItems = "center";
-      box.style.minWidth = "90px";
-      box.style.gap = "4px";
+const box = document.createElement("div");
+box.style.display = "flex";
+box.style.flexDirection = "row";  // Changed from "column" to "row"
+box.style.alignItems = "center";
+box.style.minWidth = "90px";
+box.style.gap = "8px";  // Increased gap for better spacing
 
-      const roleEl = document.createElement("div");
-      roleEl.className = "teamRole";
-      roleEl.style.color = "#000000";
-      roleEl.textContent = member.role;
+const roleEl = document.createElement("div");
+roleEl.className = "teamRole";
+roleEl.style.color = "#000000";
+roleEl.textContent = member.role;
 
-      const nameEl = document.createElement("div");
-      nameEl.style.color = "000000";
-      nameEl.style.fontSize = "0.75rem";
-      nameEl.textContent = member.name;
+const nameEl = document.createElement("div");
+nameEl.style.color = "000000";
+nameEl.style.fontSize = "0.75rem";
+nameEl.textContent = member.name;
 
-      box.appendChild(roleEl);
-      box.appendChild(nameEl);
+box.appendChild(roleEl);
+box.appendChild(nameEl);
       teamContainer.appendChild(box);
     });
     wrapper.appendChild(teamContainer);
@@ -1483,7 +1483,7 @@ sortedMilestones.forEach((m, mi) => {
 const ms = document.createElement("div");
 ms.className = "milestone group-" + gi + pulseClass;
 ms.style.left = (startX + mi * milestoneSpacing) + "px";
-ms.style.top  = (y - 20) + "px";
+ms.style.top  = (y - 17) + "px";
 ms.style.width = milestoneWidth + "px";
 ms.style.height = BAR_HEIGHT + "px";
 ms.style.display = "flex";
