@@ -1290,6 +1290,20 @@ wrapper.appendChild(compileBtn);
 
 (g.projects || []).forEach((p, pi) => {
   
+// Create project container with blue border - full width of group card
+const projectContainer = document.createElement("div");
+projectContainer.className = "project-container group-" + gi;
+projectContainer.style.position = "absolute";
+projectContainer.style.left = (sidePad + 10) + "px";  // Group card left + padding
+projectContainer.style.top = (y - 25) + "px";         // Start above project name
+projectContainer.style.width = (wrapper.clientWidth - sidePad * 2 - 20) + "px"; // Full group card width minus padding
+projectContainer.style.height = (BAR_HEIGHT + 30) + "px"; // Reduced height
+projectContainer.style.border = "1px solid blue";     // Thinner border
+projectContainer.style.borderRadius = "4px";
+projectContainer.style.backgroundColor = "transparent";
+projectContainer.style.pointerEvents = "none";        // Don't interfere with clicks
+projectContainer.style.zIndex = "1";                  // Ensure it's behind other elements
+wrapper.appendChild(projectContainer);
 
   // project name
   const projName = document.createElement("span");
