@@ -1290,6 +1290,20 @@ wrapper.appendChild(compileBtn);
 
 (g.projects || []).forEach((p, pi) => {
 
+  // Create project container with blue border
+  const projectContainer = document.createElement("div");
+  projectContainer.className = "project-container group-" + gi;
+  projectContainer.style.position = "absolute";
+  projectContainer.style.left = (sidePad - 5) + "px";  // Start slightly before project name
+  projectContainer.style.top = (y - 35) + "px";        // Start above project name
+  projectContainer.style.width = (barW + 200) + "px";  // Wide enough to include milestones
+  projectContainer.style.height = (BAR_HEIGHT + 50) + "px"; // Tall enough to include everything
+  projectContainer.style.border = "2px solid blue";
+  projectContainer.style.borderRadius = "6px";
+  projectContainer.style.backgroundColor = "transparent";
+  projectContainer.style.pointerEvents = "none";       // Don't interfere with clicks
+  wrapper.appendChild(projectContainer);
+
   // project name
   const projName = document.createElement("span");
   projName.className = "absolute group-" + gi;
