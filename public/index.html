@@ -1433,7 +1433,7 @@ if (currentUser?.role === "user") {
 // milestones FIRST
 if (Array.isArray(p.milestones)) {
   // Calculate centered positioning for milestones
-  const milestoneWidth = 130;
+  const milestoneWidth = 200;
   const milestoneSpacing = 150;
   const totalWidth = p.milestones.length * milestoneSpacing - (milestoneSpacing - milestoneWidth);
   const startX = barX + (barW / 2) - (totalWidth / 2);
@@ -1487,7 +1487,7 @@ ms.style.top  = (y - 20) + "px";
 ms.style.width = milestoneWidth + "px";
 ms.style.height = BAR_HEIGHT + "px";
 ms.style.display = "flex";
-ms.style.flexDirection = "column";
+ms.style.flexDirection = "row";
 ms.style.alignItems = "center";
 ms.style.justifyContent = "center";
 ms.style.fontSize = "8px";
@@ -1501,7 +1501,6 @@ ms.style.padding = "2px";
 // Add milestone label inside the box
 const labelDiv = document.createElement("div");
 labelDiv.style.fontSize = "7px";
-labelDiv.style.marginBottom = "1px";
 labelDiv.style.lineHeight = "1";
 labelDiv.textContent = m.label || "";
 
@@ -2127,11 +2126,11 @@ if (pi != null && pi !== undefined) {
           if (btnSave) {
        btnSave.onclick = () => {
 const defaultMilestones = [
-  { label: "Design Review", date: "", status: "incomplete" },
-  { label: "Material Procurement", date: "", status: "incomplete" },
-  { label: "Fabrication Complete", date: "", status: "incomplete" },
-  { label: "Installation Complete", date: "", status: "incomplete" },
-  { label: "Final Inspection", date: "", status: "incomplete" }
+  { label: "KICKOFF", date: "", status: "incomplete" },
+  { label: "WELD QC", date: "", status: "incomplete" },
+  { label: "PAINT QC", date: "", status: "incomplete" },
+  { label: "FINAL QC", date: "", status: "incomplete" },
+  { label: "PREP FOR SHIP", date: "", status: "incomplete" }
 ];
 
 const payload = {
