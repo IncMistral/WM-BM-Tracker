@@ -1438,7 +1438,21 @@ if (Array.isArray(p.milestones)) {
   const totalWidth = p.milestones.length * milestoneSpacing - (milestoneSpacing - milestoneWidth);
   const startX = barX + (barW / 2) - (totalWidth / 2);
 
-  p.milestones.forEach((m, mi) => {
+ // Sort milestones by date (earliest first)
+const sortedMilestones = [...p.milestones].sort((a, b) => {
+  const dateA = a.date || a.startDate;
+  const dateB = b.date || b.startDate;
+  
+  // Put milestones without dates at the end
+  if (!dateA && !dateB) return 0;
+  if (!dateA) return 1;
+  if (!dateB) return -1;
+  
+  // Sort by date (earliest first)
+  return new Date(dateA) - new Date(dateB);
+});
+
+sortedMilestones.forEach((m, mi) => {
     // Calculate days remaining and color
     let daysText = "";
     let backgroundColor = "gray";
@@ -2521,6 +2535,15 @@ for (let i = 0; i < projectBarRegions.length; i++) {
 
   document.addEventListener('contextmenu', (e) => e.preventDefault(), { passive: false });
 
+// Handle window resize to fix group card scaling
+window.addEventListener('resize', () => {
+  // Debounce the resize to avoid excessive re-renders
+  clearTimeout(window.resizeTimeout);
+  window.resizeTimeout = setTimeout(() => {
+    render();
+  }, 100);
+});
+
   /* ===================== LOGIN / USER PROFILE ===================== */
 // Restore session if it exists
 let loggedInUser = localStorage.getItem("loggedInUser");
@@ -2889,35 +2912,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
       document.getElementById("screenOverlay").style.display = "none";
-  
-  // Start auto-refresh if user is already logged in on page load
-  startAutoRefresh();
-  startMonthChangeDetection();
-
-    // Auto-refresh timeline on first of month for users
-    if (currentUser?.role === "user") {
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(now.getDate() + 1);
-      tomorrow.setHours(0, 1, 0, 0); // 12:01 AM tomorrow
-      
-      // If tomorrow is the first of the month, set up auto-refresh
-      if (tomorrow.getDate() === 1) {
-        const msUntilRefresh = tomorrow.getTime() - now.getTime();
-        setTimeout(() => {
-          render(); // Refresh to show new month
-          // Set up daily check for first-of-month refresh
-          setInterval(() => {
-            const checkDate = new Date();
-            if (checkDate.getDate() === 1 && checkDate.getHours() === 0 && checkDate.getMinutes() === 1) {
-              render();
-            }
-          }, 60000); // Check every minute
-        }, msUntilRefresh);
-      }
-    }
-
-    applyPermissions();
+      applyPermissions();
   }
   renderUserList();
 });
