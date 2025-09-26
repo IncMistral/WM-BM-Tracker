@@ -184,7 +184,7 @@ input, select{
     .tick { pointer-events:none; }
     .draggable { cursor: grab; }
     .dragging, .draggable:active { cursor: grabbing; }
-    .teamRole { font-weight:bold; font-size: var(--fs-12); text-decoration: underline; text-underline-offset: 0.1875rem; text-decoration-thickness: 0.125rem; }
+    .teamRole { font-weight:bold; font-size: var(--fs-12); text-decoration: none; }
 
     /* Modals */
     .modal { display:none; position:fixed; inset:0; justify-content:center; align-items:center; z-index:2000; }
@@ -1297,7 +1297,7 @@ projectContainer.style.position = "absolute";
 projectContainer.style.left = (sidePad + 10) + "px";  // Group card left + padding
 projectContainer.style.top = (y - 20) + "px";         // Start above project name
 projectContainer.style.width = (wrapper.clientWidth - sidePad * 2 - 20) + "px"; // Full group card width minus padding
-projectContainer.style.height = (BAR_HEIGHT + 25) + "px"; // Reduced height
+projectContainer.style.height = (BAR_HEIGHT + 35) + "px"; // Reduced height
 projectContainer.style.border = "1px solid blue";     // Thinner border
 projectContainer.style.borderRadius = "4px";
 projectContainer.style.backgroundColor = "transparent";
