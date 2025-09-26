@@ -1472,7 +1472,7 @@ sortedMilestones.forEach((m, mi) => {
         backgroundColor = "orange";
       } else if (diffDays === 0) {
         daysText = "Due Today";
-        backgroundColor = "blue";
+        backgroundColor = "#a3d7d9";
         pulseClass = " milestone-pulse";
       } else {
         daysText = `${Math.abs(diffDays)} Days Overdue`;
@@ -1492,12 +1492,12 @@ ms.style.alignItems = "center";
 ms.style.justifyContent = "space-between";
 ms.style.gap = "2px";
 ms.style.fontSize = "8px";
-ms.style.color = "white";
+ms.style.color = "black";
 ms.style.fontWeight = "bold";
 ms.style.textAlign = "center";
 ms.style.background = backgroundColor;
 ms.style.borderRadius = "4px";
-ms.style.padding = "2px";
+ms.style.padding = "4px";
 
 // Add milestone label inside the box
 const labelDiv = document.createElement("div");
