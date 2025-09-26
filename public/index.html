@@ -1481,38 +1481,38 @@ sortedMilestones.forEach((m, mi) => {
     }
 // Milestone Colored Box
 const ms = document.createElement("div");
-      ms.className = "milestone group-" + gi + pulseClass;
-      ms.style.left = (startX + mi * milestoneSpacing) + "px";
-      ms.style.top  = (y - 20) + "px";  
-      ms.style.width = milestoneWidth + "px";
-      ms.style.height = BAR_HEIGHT + "px";
-      ms.style.display = "flex";
-      ms.style.alignItems = "center";
-      ms.style.justifyContent = "center";
-      ms.style.fontSize = "9px";
-      ms.style.color = "white";
-      ms.style.fontWeight = "bold";
-      ms.style.textAlign = "center";
-      ms.style.background = backgroundColor;
-      ms.style.borderRadius = "4px";
-      ms.textContent = daysText;
-      wrapper.appendChild(ms);
+ms.className = "milestone group-" + gi + pulseClass;
+ms.style.left = (startX + mi * milestoneSpacing) + "px";
+ms.style.top  = (y - 20) + "px";
+ms.style.width = milestoneWidth + "px";
+ms.style.height = BAR_HEIGHT + "px";
+ms.style.display = "flex";
+ms.style.flexDirection = "column";
+ms.style.alignItems = "center";
+ms.style.justifyContent = "center";
+ms.style.fontSize = "8px";
+ms.style.color = "white";
+ms.style.fontWeight = "bold";
+ms.style.textAlign = "center";
+ms.style.background = backgroundColor;
+ms.style.borderRadius = "4px";
+ms.style.padding = "2px";
 
-// Label below milestone
-const labelWrap = document.createElement("div");
-      labelWrap.className = "group-" + gi;
-      labelWrap.style.position = "absolute";
-      labelWrap.style.left = (startX + mi * milestoneSpacing + milestoneWidth/2) + "px";
-      labelWrap.style.top  = (y + BAR_HEIGHT -21) + "px";
-      labelWrap.style.transform = "translateX(-50%)";
-      labelWrap.style.textAlign = "center";
+// Add milestone label inside the box
+const labelDiv = document.createElement("div");
+labelDiv.style.fontSize = "7px";
+labelDiv.style.marginBottom = "1px";
+labelDiv.style.lineHeight = "1";
+labelDiv.textContent = m.label || "";
 
-      const lbl = document.createElement("div");
-      lbl.className = "milestone-label";
-      lbl.textContent = m.label || "";
+const daysDiv = document.createElement("div");
+daysDiv.style.fontSize = "8px";
+daysDiv.style.lineHeight = "1";
+daysDiv.textContent = daysText;
 
-      labelWrap.appendChild(lbl);
-      wrapper.appendChild(labelWrap);
+ms.appendChild(labelDiv);
+ms.appendChild(daysDiv);
+wrapper.appendChild(ms);
   });
 }
 }
@@ -2079,7 +2079,21 @@ if (idx == null || idx === '') {
   function openProjectModal(gi, pi) {
     contextTarget = { groupIndex: gi, projectIndex: pi };
     const g = groups[gi];
-    const p = (pi == null || pi === undefined) ? { name:'', startDate:'', completionDate:'', milestones:[] } : g.projects[pi];
+
+    const defaultMilestones = [
+  { label: "Design Review", date: "", status: "incomplete" },
+  { label: "Material Procurement", date: "", status: "incomplete" },
+  { label: "Fabrication Complete", date: "", status: "incomplete" },
+  { label: "Installation Complete", date: "", status: "incomplete" },
+  { label: "Final Inspection", date: "", status: "incomplete" }
+];
+
+const p = (pi == null || pi === undefined) ? { 
+  name:'', 
+  startDate:'', 
+  completionDate:'', 
+  milestones: [...defaultMilestones] 
+} : g.projects[pi];
 
     // Set modal title based on whether editing or adding
 const modalTitle = document.getElementById('projectModalTitle');
@@ -2112,13 +2126,21 @@ if (pi != null && pi !== undefined) {
 
           if (btnSave) {
        btnSave.onclick = () => {
-    const payload = {
-      name: (nameInp instanceof HTMLInputElement) ? (nameInp.value.trim() || 'Project') : 'Project',
-      poNumber: (poInp instanceof HTMLInputElement) ? (poInp.value.trim() || '') : '',
-      startDate: (start instanceof HTMLInputElement) ? (start.value || '') : '',
-      completionDate: (comp instanceof HTMLInputElement) ? (comp.value || '') : '',
-      milestones: Array.isArray(p.milestones) ? p.milestones : []
-    };
+const defaultMilestones = [
+  { label: "Design Review", date: "", status: "incomplete" },
+  { label: "Material Procurement", date: "", status: "incomplete" },
+  { label: "Fabrication Complete", date: "", status: "incomplete" },
+  { label: "Installation Complete", date: "", status: "incomplete" },
+  { label: "Final Inspection", date: "", status: "incomplete" }
+];
+
+const payload = {
+  name: (nameInp instanceof HTMLInputElement) ? (nameInp.value.trim() || 'Project') : 'Project',
+  poNumber: (poInp instanceof HTMLInputElement) ? (poInp.value.trim() || '') : '',
+  startDate: (start instanceof HTMLInputElement) ? (start.value || '') : '',
+  completionDate: (comp instanceof HTMLInputElement) ? (comp.value || '') : '',
+  milestones: Array.isArray(p.milestones) && p.milestones.length > 0 ? p.milestones : [...defaultMilestones]
+};
 
   let projectIndex;
 
