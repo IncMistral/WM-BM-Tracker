@@ -14,9 +14,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // ✅ Use persistent disk path on Render
-const DATA_FILE = path.join("/backend", "data.json");
+const DATA_FILE = path.join(__dirname, "data.json");
 // ✅ NEW: Add users file
-const USERS_FILE = path.join("/backend", "users.json");
+const USERS_FILE = path.join(__dirname, "users.json");
 
 // Ensure data file exists
 if (!fs.existsSync(DATA_FILE)) {
@@ -343,3 +343,4 @@ app.listen(PORT, () => {
   console.log(`✅ Data file: ${DATA_FILE}`);
   console.log(`✅ Users file: ${USERS_FILE}`);
 });
+
