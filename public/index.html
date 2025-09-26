@@ -144,6 +144,29 @@ input, select{
   color: #000000;
 }
 
+/* Pulse animation for due today milestones */
+.milestone-pulse {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.1);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
     .completion { position:absolute; font-size:var(--fs-12); color:#000000; white-space:nowrap; pointer-events:none; }
     .weekendHatch { background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 6px); pointer-events:none; }
 
@@ -1285,7 +1308,7 @@ if (p.poNumber) {
   poNumber.className = "absolute group-" + gi;
   poNumber.className = "absolute";
   poNumber.style.left = sidePad + "px";
-  poNumber.style.top = (y + BAR_HEIGHT/2 - 5) + "px";  // Position below project name
+  poNumber.style.top = (y + BAR_HEIGHT/2 - 12) + "px";  // Position below project name
   poNumber.style.width = labelColWidth + "px";
   poNumber.style.textAlign = "right";
   poNumber.style.fontSize = "0.75rem";
@@ -1295,23 +1318,42 @@ if (p.poNumber) {
 }
 
 // start date label
-  if (p.startDate) {
-    const startLabel = document.createElement("span");
-    startLabel.className = "absolute group-" + gi;
-    startLabel.style.left = (barXBase + 65) + "px";
-    startLabel.style.top  = (y - 10) + "px";
-    startLabel.style.transform = "translateX(-100%) translateY(-50%)";
-    startLabel.style.fontSize = "0.8rem";
-    startLabel.style.color = "#000000";
-    const formatTimelineDate = (dateStr) => {
-  if (!dateStr) return "";
-  const [year, month, day] = dateStr.split('-');
-  return `${month}/${day}/${year}`;
-};
+if (p.startDate) {
+  const startLabel = document.createElement("span");
+  startLabel.className = "absolute group-" + gi;
+  startLabel.style.left = (barXBase + 150) + "px";
+  startLabel.style.top  = (y - 10) + "px";
+  startLabel.style.transform = "translateX(-100%) translateY(-50%)";
+  startLabel.style.fontSize = "0.8rem";
+  startLabel.style.color = "#000000";
+  const formatTimelineDate = (dateStr) => {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split('-');
+    return `${month}/${day}/${year}`;
+  };
 
-startLabel.textContent = formatTimelineDate(p.startDate);
-    wrapper.appendChild(startLabel);
-  }
+  startLabel.textContent = "Start Date: " + formatTimelineDate(p.startDate);
+  wrapper.appendChild(startLabel);
+}
+
+// end date label (below start date)
+if (p.completionDate) {
+  const endLabel = document.createElement("span");
+  endLabel.className = "absolute group-" + gi;
+  endLabel.style.left = (barXBase + 150) + "px";
+  endLabel.style.top  = (y + 8) + "px";  // Position below start date
+  endLabel.style.transform = "translateX(-100%) translateY(-50%)";
+  endLabel.style.fontSize = "0.8rem";
+  endLabel.style.color = "#000000";
+  const formatTimelineDate2 = (dateStr) => {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split('-');
+    return `${month}/${day}/${year}`;
+  };
+
+  endLabel.textContent = "End Date: " + formatTimelineDate2(p.completionDate);
+  wrapper.appendChild(endLabel);
+}
 
 const barX = barXBase;
 
@@ -1331,34 +1373,6 @@ if (window.screen.width >= 3840) {
 
 const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
 
-// bar + border
-  const bar = document.createElement("div");
-  bar.className = "bar group-" + gi;
-  bar.style.left = barX + "px";
-  bar.style.top = y + "px";
-  bar.style.width = barW + "px";
-  bar.style.height = BAR_HEIGHT + "px";
-  bar.setAttribute('role','img');
-  bar.setAttribute('aria-label', (p.startDate && p.completionDate)
-    ? `Timeline for ${p.name} from ${p.startDate} to ${p.completionDate}`
-    : `Timeline for ${p.name}`);
-  wrapper.appendChild(bar);
-
-  projectBarRegions.push({
-    gi, pi,
-    x1: barX,
-    x2: barX + barW,
-    y1: y,
-    y2: y + BAR_HEIGHT
-  });
-
-const border = document.createElement("div");
-  border.className = "bar-border group-" + gi;
-  border.style.left = barX + "px";
-  border.style.top = y + "px";
-  border.style.width = barW + "px";
-  border.style.height = BAR_HEIGHT + "px";
-  wrapper.appendChild(border);
 
   // fill, milestones, ticks
   if (p.startDate && p.completionDate) {
@@ -1416,155 +1430,81 @@ if (currentUser?.role === "user") {
     const progress = Math.max(0, Math.min(1, (nowClamped - visibleStart) / (visibleEnd - visibleStart)));
     const fillW = barW * progress;
 
-const fill = document.createElement("div");
-    fill.className = "bar-fill group-" + gi;
-    fill.style.left = barX + "px";
-    fill.style.top  = y + "px";
-    fill.style.width = fillW + "px";
-    fill.style.height = BAR_HEIGHT + "px";
-    wrapper.appendChild(fill);
-
-// drag to pan (disabled for users)
-    if (totalDays > zoomDays && currentUser?.role === "admin") {
-      const startDragHandler = (evt) => startDrag(evt, gi, pi, barW, totalDays);
-      bar.classList.add('draggable');  bar.onmousedown = startDragHandler;
-      fill.classList.add('draggable'); fill.onmousedown = startDragHandler;
-    } else {
-      bar.classList.remove('draggable');  bar.onmousedown = null;
-      fill.classList.remove('draggable'); fill.onmousedown = null;
-    }
-
 // milestones FIRST
 if (Array.isArray(p.milestones)) {
-  p.milestones.forEach(m => {
-    if (!m?.date) return;
-    const d = parseLocalDate(m.date);
-    if (d >= visibleStart && d <= visibleEnd) {
-      const ratio = (d - visibleStart) / (visibleEnd - visibleStart);
-      const mx = barX + ratio * barW;
+  // Calculate centered positioning for milestones
+  const milestoneWidth = 130;
+  const milestoneSpacing = 150;
+  const totalWidth = p.milestones.length * milestoneSpacing - (milestoneSpacing - milestoneWidth);
+  const startX = barX + (barW / 2) - (totalWidth / 2);
 
+  p.milestones.forEach((m, mi) => {
+    // Calculate days remaining and color
+    let daysText = "";
+    let backgroundColor = "gray";
+    let pulseClass = "";
+    
+    if (m.date) {
+      const today = new Date();
+      const dueDate = parseLocalDate(m.date);
+      const diffTime = dueDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays > 30) {
+        daysText = `${diffDays} Days Remaining`;
+        backgroundColor = "green";
+      } else if (diffDays > 0) {
+        daysText = `${diffDays} Days Remaining`;
+        backgroundColor = "orange";
+      } else if (diffDays === 0) {
+        daysText = "Due Today";
+        backgroundColor = "blue";
+        pulseClass = " milestone-pulse";
+      } else {
+        daysText = `${Math.abs(diffDays)} Days Overdue`;
+        backgroundColor = "red";
+      }
+    }
+// Milestone Colored Box
 const ms = document.createElement("div");
-      ms.className = "milestone group-" + gi;
-      ms.style.left = mx + "px";
-      ms.style.top  = y + "px";
-      ms.style.width = cellW + "px";
+      ms.className = "milestone group-" + gi + pulseClass;
+      ms.style.left = (startX + mi * milestoneSpacing) + "px";
+      ms.style.top  = (y - 20) + "px";  
+      ms.style.width = milestoneWidth + "px";
       ms.style.height = BAR_HEIGHT + "px";
-
-      // ✅ Auto status update based on due date unless completed
-        if (m.date) {
-        const dueDate = parseLocalDate(m.date);
-        const today = new Date();
-
-        if (m.status === "completed" || m.status === "completedLate") {
-          // keep completed states as-is
-        } else {
-          if (today > endOfDay(dueDate)) {
-            m.status = "overdue";   // 🔴
-          } else {
-            m.status = "incomplete"; // 🟠
-          }
-        }
-      }
-
-
-      // Apply colors based on status
-      switch (m.status) {
-        case 'incomplete':    ms.style.background = "orange"; break;   // 🟠 upcoming
-        case 'overdue':       ms.style.background = "red"; break;      // 🔴 past due
-        case 'completedLate': ms.style.background =
-          "repeating-linear-gradient(45deg, red, red 4px, limegreen 4px, limegreen 8px)";
-          break;
-        case 'completed':     ms.style.background = "limegreen"; break; // 🟢 completed
-        default:
-          ms.style.background = "orange";
-          m.status = "incomplete";
-      }
+      ms.style.display = "flex";
+      ms.style.alignItems = "center";
+      ms.style.justifyContent = "center";
+      ms.style.fontSize = "9px";
+      ms.style.color = "white";
+      ms.style.fontWeight = "bold";
+      ms.style.textAlign = "center";
+      ms.style.background = backgroundColor;
+      ms.style.borderRadius = "4px";
+      ms.textContent = daysText;
       wrapper.appendChild(ms);
 
-      // Label + date
+// Label below milestone
 const labelWrap = document.createElement("div");
       labelWrap.className = "group-" + gi;
       labelWrap.style.position = "absolute";
-      labelWrap.style.left = (mx + cellW / 2) + "px";
-      labelWrap.style.top  = (y + BAR_HEIGHT + 4) + "px";
+      labelWrap.style.left = (startX + mi * milestoneSpacing + milestoneWidth/2) + "px";
+      labelWrap.style.top  = (y + BAR_HEIGHT -21) + "px";
       labelWrap.style.transform = "translateX(-50%)";
-      labelWrap.style.display = "flex";
-      labelWrap.style.flexDirection = "column";
-      labelWrap.style.alignItems = "center";
-      labelWrap.style.gap = "2px";
+      labelWrap.style.textAlign = "center";
 
       const lbl = document.createElement("div");
       lbl.className = "milestone-label";
       lbl.textContent = m.label || "";
 
-      const dateLbl = document.createElement("div");
-      dateLbl.className = "milestone-date";
-      
-
       labelWrap.appendChild(lbl);
-      labelWrap.appendChild(dateLbl);
       wrapper.appendChild(labelWrap);
-    }
   });
 }
-
-    // ticks + labels LAST
-    for (let i = 0; i <= viewportDays; i++) {
-      const curDate   = addDaysLocal(visibleStart, i);
-      const dayOfWeek = curDate.getDay();
-      const x = barX + (i / viewportDays) * barW;
-
-const tick = document.createElement("div");
-      tick.className = "absolute tick group-" + gi;
-      tick.style.left = x + "px";
-      tick.style.top = y + "px";
-      tick.style.width = "1px";
-      tick.style.height = BAR_HEIGHT + "px";
-      tick.style.background = "rgba(0,0,0,0.1)";
-      wrapper.appendChild(tick);
-
-      if (i < viewportDays) {
- const label = document.createElement("div");
-        label.className = "dayLetter group-" + gi;
-        label.style.left = (x + cellW / 2) + "px";
-        label.style.top  = (y + BAR_HEIGHT / 2) + "px";
-
-        const month = curDate.getMonth() + 1;
-        const date  = curDate.getDate();
-        const dow   = ['S','M','T','W','T','F','S'][dayOfWeek];
-
-        label.innerHTML = `<div>${dow}</div><div style="font-size:0.75rem;">${month}/${String(date).padStart(2,"0")}</div>`;
-        wrapper.appendChild(label);
-      }
-
-      if (i < viewportDays && (dayOfWeek === 0 || dayOfWeek === 6)) {
-const weekend = document.createElement("div");
-        weekend.className = "absolute weekendHatch group-" + gi;
-        weekend.style.left = x + "px";
-        weekend.style.top  = y + "px";
-        weekend.style.width = cellW + "px";
-        weekend.style.height = BAR_HEIGHT + "px";
-        wrapper.appendChild(weekend);
-      }
-    }
-
-    // completion countdown
-    if (p.completionDate) {
-      const today = new Date();
-      const end = new Date(p.completionDate);
-      const diff = Math.max(0, Math.ceil((end - today) / (1000*60*60*24)));
-const comp = document.createElement("div");
-      comp.className = "completion group-" + gi;
-      comp.style.left = (barX + barW - 120) + "px";
-      comp.style.top = (y - 16) + "px";
-      comp.style.fontSize = "0.8rem";
-      comp.textContent = `${formatTimelineDate(p.completionDate)} | T - ${diff}`;
-      wrapper.appendChild(comp);
-    }
-  } // end if dates exist
+}
 
   y += BAR_HEIGHT + GAP;
-}); // ✅ closes projects.forEach
+}); 
 
 // group card expansion
 const lastRowBottom = y - (BAR_HEIGHT + GAP);
@@ -1617,7 +1557,7 @@ name.textContent = projectName + poNumber;
   return `${month}/${day}/${year}`;
 };
 
-dates.textContent = `${formatDate(p.startDate)} → ${formatDate(p.completionDate)}`;
+dates.innerHTML = `Start Date: ${formatDate(p.startDate)}<br>End Date: ${formatDate(p.completionDate)}`;
 
       const edit = document.createElement("button");
       edit.textContent = "Edit";
@@ -1980,81 +1920,14 @@ sortedMilestones.forEach((m, displayIndex) => {
     edit.addEventListener('click', () => openMilestoneModal(gi, pi, mi));
     row.appendChild(edit);
 
-    // --- Status toggle button ---
-    const toggle = document.createElement('button');
-    const today = new Date();
-    const dueDate = m.date ? parseLocalDate(m.date) : null;
-    const isUpcoming = dueDate && today <= dueDate; // upcoming vs past-due
+// default status if not set
+const today = new Date();
+const dueDate = m.date ? parseLocalDate(m.date) : null;
+const isUpcoming = dueDate && today <= dueDate;
 
-    function applyButtonStyle(status) {
-      switch (status) {
-        case 'incomplete': // upcoming
-          toggle.textContent = 'Upcoming';
-          toggle.style.background = 'orange';
-          toggle.style.color = 'white';
-          break;
-        case 'overdue': // past due
-          toggle.textContent = 'Overdue';
-          toggle.style.background = 'red';
-          toggle.style.color = 'white';
-          break;
-        case 'completed':
-          toggle.textContent = 'Completed';
-          toggle.style.background = 'limegreen';
-          toggle.style.color = 'white';
-          break;
-        case 'completedLate':
-          toggle.textContent = 'Completed Late';
-          toggle.style.background =
-            'repeating-linear-gradient(45deg, red, red 4px, limegreen 4px, limegreen 8px)';
-          toggle.style.color = 'white';
-          break;
-      }
-    }
-
-    // default status if not set
-    if (!m.status) {
-      m.status = isUpcoming ? 'incomplete' : 'overdue';
-    }
-
-    applyButtonStyle(m.status);
-
-// toggle behavior
-toggle.addEventListener('click', () => {
-  const oldStatus = m.status;
-
-  if (isUpcoming) {
-    m.status = (m.status === 'incomplete') ? 'completed' : 'incomplete';
-  } else {
-    if (m.status === 'overdue') {
-      m.status = 'completed';
-    } else if (m.status === 'completed') {
-      m.status = 'completedLate';
-    } else {
-      m.status = 'overdue';
-    }
-  }
-
-  // ✅ Add log entry for status change
-  if (oldStatus !== m.status) {
-    addLogEntry(g.name, "milestone-status-change", {
-      groupIndex: gi,
-      projectIndex: pi,
-      milestoneIndex: mi,
-      label: m.label || "",
-      from: oldStatus,
-      to: m.status
-    });
-    compileDailyLogs();
-  }
-
-  saveData();
-  applyButtonStyle(m.status);
-  render();
-});
-
-
-    row.appendChild(toggle);
+if (!m.status) {
+  m.status = isUpcoming ? 'incomplete' : 'overdue';
+}
 
     // --- Delete button ---
     const del = document.createElement('button');
@@ -3122,8 +2995,8 @@ function showReportPage(group) {
           return `
             <div style="margin-bottom:1.5rem;">
               <h4>${p.name || "Untitled Project"}</h4>
-              <p><strong>Start:</strong> ${p.startDate || "—"} 
-                 &nbsp; <strong>Completion:</strong> ${p.completionDate || "—"}</p>
+              <p><strong>Start Date:</strong> ${p.startDate || "—"}<br>
+   <strong>End Date:</strong> ${p.completionDate || "—"}</p>
               ${
                 milestones
                   ? `<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse; margin-top:0.5rem;">
