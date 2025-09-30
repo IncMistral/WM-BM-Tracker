@@ -593,10 +593,9 @@ async function loadFromServer() {
 
 
 window.addEventListener("DOMContentLoaded", async () => {
-  // Load groups and logs
   const loaded = await loadFromServer();
   if (!loaded) {
-    groups = [];
+    console.warn("Could not load from server, keeping existing data");
   }
   
   // Load users from server
@@ -2540,7 +2539,6 @@ function wireToolbar() {
   const ok = await loadFromServer();
   if (!ok) {
     console.warn("Starting with empty dataset");
-    groups = [];
   }
   render();
   });
