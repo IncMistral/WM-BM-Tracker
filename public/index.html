@@ -1362,7 +1362,8 @@ wrapper.appendChild(projectContainer);
   projName.style.width = labelColWidth + "px";
   projName.style.textAlign = "right";
   projName.style.fontSize = ".75rem";
-  projName.style.color = "#000000";
+  projName.style.fontWeight = "bold";
+  projName.style.color = "#242B96";
   projName.textContent = p.name;
   wrapper.appendChild(projName);
 
@@ -1372,11 +1373,12 @@ if (p.poNumber) {
   poNumber.className = "absolute group-" + gi;
   poNumber.className = "absolute";
   poNumber.style.left = (sidePad + 20) + "px";
-  poNumber.style.top = (y + BAR_HEIGHT/2 - 12) + "px";  // Position below project name
+  poNumber.style.top = (y + BAR_HEIGHT/2 - 12) + "px";  
   poNumber.style.width = labelColWidth + "px";
   poNumber.style.textAlign = "right";
   poNumber.style.fontSize = "0.75rem";
-  poNumber.style.color = "#000000";  // Slightly dimmed color
+  projName.style.fontWeight = "bold";
+  poNumber.style.color = "#242B96";  
   poNumber.textContent = "" + p.poNumber;
   wrapper.appendChild(poNumber);
 }
