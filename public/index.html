@@ -1357,7 +1357,7 @@ wrapper.appendChild(projectContainer);
   // project name
   const projName = document.createElement("span");
   projName.className = "absolute group-" + gi;
-  projName.style.left = sidePad + "px";
+  projName.style.left = (sidePad + 20) + "px";
   projName.style.top = (y + BAR_HEIGHT/2 - 28) + "px";
   projName.style.width = labelColWidth + "px";
   projName.style.textAlign = "right";
@@ -1371,7 +1371,7 @@ if (p.poNumber) {
   const poNumber = document.createElement("span");
   poNumber.className = "absolute group-" + gi;
   poNumber.className = "absolute";
-  poNumber.style.left = sidePad + "px";
+  poNumber.style.left = (sidePad + 20) + "px";
   poNumber.style.top = (y + BAR_HEIGHT/2 - 12) + "px";  // Position below project name
   poNumber.style.width = labelColWidth + "px";
   poNumber.style.textAlign = "right";
