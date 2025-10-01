@@ -1400,11 +1400,11 @@ const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
 
 // milestones FIRST
 if (Array.isArray(p.milestones)) {
-  // Calculate centered positioning for milestones
-  const milestoneWidth = 200;
-  const milestoneSpacing = 225;
-  const totalWidth = p.milestones.length * milestoneSpacing - (milestoneSpacing - milestoneWidth);
-  const startX = barX + (barW / 2) - (totalWidth / 2);
+
+// Position milestones starting from the left, after the dates
+const milestoneWidth = 200;
+const milestoneSpacing = 225;
+const startX = barXBase + 160; // Start just after the start/end date labels
 
  // Sort milestones by date (earliest first)
 const sortedMilestones = [...p.milestones].sort((a, b) => {
