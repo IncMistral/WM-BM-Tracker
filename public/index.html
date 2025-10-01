@@ -80,11 +80,14 @@ body {
   box-shadow: var(--shadow-1);
 }
     #topBar .logo { height:2rem; width:auto; object-fit:contain; display:block; }
+    
 #trackerWrapper { 
   flex: 1;
   position: relative;
   background: #ffffff;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100vh - 48px);
   min-height: 50rem;
 }
     .absolute { position:absolute; white-space:nowrap; }
