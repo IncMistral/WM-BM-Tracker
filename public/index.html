@@ -306,8 +306,6 @@ body {
 }
     .row { display: flex; gap: 0.5rem; }
 
-    .row { display: flex; gap: 0.5rem; }
-
 #milestoneLegend {
   flex-shrink: 0;
   white-space: nowrap;
@@ -622,44 +620,11 @@ function addDaysLocal(date, days) {
   d.setDate(d.getDate() + days);
   return d;
 }
-function endOfDay(date) {
-  const d = new Date(date);
-  d.setHours(23, 59, 59, 999);
-  return d;
-}
 
 function endOfDay(date) {
   const d = new Date(date);
   d.setHours(23, 59, 59, 999);
   return d;
-}
-
-function checkForMonthChange() {
-  if (currentUser?.role !== "user") return;
-  
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  
-  // Store last known month in a global variable
-  if (window.lastKnownMonth === undefined) {
-    window.lastKnownMonth = currentMonth;
-    window.lastKnownYear = currentYear;
-    return;
-  }
-  
-  // Check if month changed
-  if (currentMonth !== window.lastKnownMonth || currentYear !== window.lastKnownYear) {
-    window.lastKnownMonth = currentMonth;
-    window.lastKnownYear = currentYear;
-    render(); // Re-render to show new month
-  }
-}
-
-function startMonthChangeDetection() {
-  if (currentUser?.role !== "user") return;
-  // Check every hour for month changes
-  setInterval(checkForMonthChange, 60 * 60 * 1000);
 }
 
 /* ===================== LOGGING ===================== */
@@ -1371,7 +1336,6 @@ wrapper.appendChild(projectContainer);
 if (p.poNumber) {
   const poNumber = document.createElement("span");
   poNumber.className = "absolute group-" + gi;
-  poNumber.className = "absolute";
   poNumber.style.left = (sidePad + 20) + "px";
   poNumber.style.top = (y + BAR_HEIGHT/2 - 12) + "px";  
   poNumber.style.width = labelColWidth + "px";
@@ -2536,29 +2500,6 @@ function wireToolbar() {
 (function init() {
   wireToolbar();
 
-// NEW bootstrap using backend
-(async () => {
-  const ok = await loadFromServer();
-  if (!ok) {
-    console.warn("Starting with empty dataset");
-  }
-  render();
-  });
-
-// Only clear session on manual logout - remove automatic clearing on page events
-const clearSessionOnExit = () => {
-  // Only clear if user explicitly logged out
-  const explicitLogout = sessionStorage.getItem("explicitLogout");
-  if (explicitLogout === "true") {
-    try {
-      localStorage.removeItem("bm-currentUser");
-      localStorage.removeItem("loggedInUser");
-      localStorage.removeItem("userRole");
-      sessionStorage.removeItem("explicitLogout");
-    } catch (_) {}
-  }
-};
-
     // --- REPORT MODE (single-group compiled view) ---
   const m = window.location.hash.match(/^#?report=(\d+)$/);
   if (m) {
@@ -2733,7 +2674,6 @@ function handleLogin() {
   userRole     = found.role;
   localStorage.setItem("loggedInUser", loggedInUser);
   localStorage.setItem("userRole", userRole);
-
   currentUser = { username: loggedInUser, role: userRole };
   localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
 
@@ -2742,18 +2682,6 @@ function handleLogin() {
 
   // ✅ Log successful login
   addLogEntry("", "login", { username: loggedInUser, role: userRole });
-
-
-  // Assign session values
-  loggedInUser = found.username;
-  userRole = found.role;
-
-  // Save session to localStorage
-  localStorage.setItem("loggedInUser", loggedInUser);
-  localStorage.setItem("userRole", userRole);
-  currentUser = { username: loggedInUser, role: userRole };
-  localStorage.setItem("bm-currentUser", JSON.stringify(currentUser));
-
 
   // Update UI
   const btnLogin = document.getElementById('btnLogin');
@@ -2775,8 +2703,7 @@ function handleLogin() {
 
   // Start auto-refresh after successful login
   startAutoRefresh();
-  startMonthChangeDetection();
-}
+  }
 
   function handleLogout() {
     if (currentUser) {
@@ -3134,62 +3061,6 @@ function showReportPage(group) {
 
   return html;
 }
-
-const gi = contextTarget.groupIndex;
-const g = groups[gi];
-  (g.projects || []).forEach(p => {
-    html += `
-      <div style="margin-bottom: 1.5rem;">
-        <strong>${p.name || "Untitled Project"}</strong><br>
-        ${p.startDate || "?"} → ${p.completionDate || "?"}
-        <table border="1" cellspacing="0" cellpadding="4" style="margin-top:5px; border-collapse:collapse; width:100%;">
-          <tr><th>Milestone</th><th>Due Date</th><th>Status</th><th>Δ</th></tr>
-          ${(p.milestones || []).map(ms => {
-            let deltaText = "—";
-
-            if (ms.date) {
-              const now = new Date();
-              const due = endOfDay(new Date(ms.date));
-              const msDiff = due - now;
-
-              if (ms.status === "incomplete") {
-                if (now <= due) {
-                  const daysRemaining = Math.floor(msDiff / (1000*60*60*24));
-                  if (daysRemaining >= 1) {
-                    deltaText = `${daysRemaining} days remaining`;
-                  } else {
-                    const hoursRemaining = Math.floor(msDiff / (1000*60*60));
-                    deltaText = `${hoursRemaining} hours remaining`;
-                  }
-                }
-              } else if (ms.status === "overdue") {
-                if (now > due) {
-                  const overdueDays = Math.floor((now - due) / (1000*60*60*24));
-                  deltaText = `${overdueDays} days overdue`;
-                }
-              } else if (ms.status === "completed") {
-                deltaText = "0 days";
-              } else if (ms.status === "completedLate") {
-                if (now > due) {
-                  const lateDays = Math.floor((now - due) / (1000*60*60*24));
-                  deltaText = `${lateDays} days late`;
-                }
-              }
-            }
-
-            return `
-              <tr>
-                <td>${ms.label || "Milestone"}</td>
-                <td>${ms.date || ""}</td>
-                <td>${ms.status || "incomplete"}</td>
-                <td>${deltaText}</td>
-              </tr>
-            `;
-          }).join("")}
-        </table>
-      </div>
-    `;
-  });
 
   const reportContent = document.getElementById("reportContent");
   if (reportContent) reportContent.innerHTML = html;
