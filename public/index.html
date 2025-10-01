@@ -177,8 +177,8 @@ input, select{
       45deg,
       white,
       white 10px,
-      rgba(25, 135, 84, 0.3) 10px,
-      rgba(25, 135, 84, 0.3) 20px
+      rgba(25, 135, 84, 0.2) 10px,
+      rgba(25, 135, 84, 0.2) 20px
     ) !important;
 }
 
@@ -188,8 +188,8 @@ input, select{
       45deg,
       white,
       white 10px,
-      rgba(220, 53, 69, 0.3) 10px,
-      rgba(220, 53, 69, 0.3) 20px
+      rgba(220, 53, 69, 0.2) 10px,
+      rgba(220, 53, 69, 0.2) 20px
     ) !important;
 }
 
@@ -1458,23 +1458,21 @@ if (m.status === 'completed') {
     pulseClass += " milestone-completed-late";
   }
 } else {
-
-        // Original logic for incomplete milestones
-        if (diffDays > 30) {
-          daysText = `${diffDays} Days Remaining`;
-          backgroundColor = "#63f298";
-        } else if (diffDays > 0) {
-          daysText = `${diffDays} Days Remaining`;
-          backgroundColor = "orange";
-        } else if (diffDays === 0) {
-          daysText = "Due Today";
-          backgroundColor = "#a3d7d9";
-          pulseClass = " milestone-pulse";
-        } else {
-          daysText = `${Math.abs(diffDays)} Days Overdue`;
-          backgroundColor = "red";
-        }
-      }
+  if (diffDays > 30) {
+    daysText = `${diffDays} Days Remaining`;
+    backgroundColor = "#63f298";
+  } else if (diffDays > 5) {
+    daysText = `${diffDays} Days Remaining`;
+    backgroundColor = "orange";
+  } else if (diffDays >= 0) {
+    daysText = `${diffDays} Days Remaining`;
+    backgroundColor = "orange";
+    pulseClass = " milestone-pulse";
+  } else {
+    daysText = `${Math.abs(diffDays)} Days Overdue`;
+    backgroundColor = "red";
+  }
+}
     }
 // Milestone Colored Box
 const ms = document.createElement("div");
