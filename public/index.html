@@ -592,9 +592,10 @@ body {
     <input type="text" id="newUsername" placeholder="New username" />
     <input type="password" id="newPassword" placeholder="New password" />
     <select id="newRole">
-      <option value="user">User</option>
-      <option value="admin">Admin</option>
-    </select>
+  <option value="user">User</option>
+  <option value="teamlead">Team Lead</option>
+  <option value="admin">Admin</option>
+</select>
 
     <div style="margin-top:0.75rem; display:flex; justify-content:center; gap:0.5rem;">
       <button id="btnAddUser">Add User</button>
@@ -1766,8 +1767,8 @@ del.addEventListener("click", () => {
   }
 
 function openGroupModal(gi) {
-  // NEW: admin-only
-  if (userRole !== "admin") { return; }
+  // Allow admin and teamlead to open group modal
+  if (userRole !== "admin" && userRole !== "teamlead") { return; }
 
   contextTarget = { groupIndex: gi };
   const g = groups[gi];
@@ -1777,6 +1778,7 @@ function openGroupModal(gi) {
   setGroupModalControlsDisabled(false);
   openModal("groupModal");
 }
+
   function closeGroupModal() { closeModal("groupModal"); }
 
 function newGroup() {
@@ -2886,6 +2888,7 @@ function handleLogin() {
 function applyPermissions() {
   const restrictedButtons = ["btnNewGroup", "btnSave", "btnLoad", "btnEditUser"];
   const isAdmin = (userRole === "admin");
+  const isTeamLead = (userRole === "teamlead");
   const isLoggedOut = (!loggedInUser);
 
   // Hide/disable top bar buttons unless admin
@@ -2896,29 +2899,48 @@ function applyPermissions() {
       el.style.display = "inline-block";
       el.disabled = false;
     } else {
-      el.style.display = "none";   // completely hidden
-      el.disabled = true;          // extra safety
+      el.style.display = "none";
+      el.disabled = true;
     }
   });
 
-// Disable all modal controls unless admin
-const modals = ["groupModal", "projectModal", "milestoneModal", "teamModal", "editUserModal"];
-modals.forEach(id => {
-  const modal = document.getElementById(id);
-  if (!modal) return;
+  // Disable all modal controls based on role
+  const modals = ["groupModal", "projectModal", "milestoneModal", "teamModal", "editUserModal"];
+  modals.forEach(id => {
+    const modal = document.getElementById(id);
+    if (!modal) return;
 
-  const buttons = modal.querySelectorAll("button");
-  buttons.forEach(btn => {
-    if (btn.id !== "btnLogin" && btn.id !== "btnLoginSubmit" && btn.id !== "btnLoginCancel") {
-      btn.disabled = !isAdmin;   // <--- only disable if not admin
-    }
-  });
+    const buttons = modal.querySelectorAll("button");
+    buttons.forEach(btn => {
+      if (btn.id !== "btnLogin" && btn.id !== "btnLoginSubmit" && btn.id !== "btnLoginCancel") {
+        // Team Lead can only interact with milestone status toggle
+        if (isTeamLead) {
+          // Check if this button is a milestone toggle button by checking its parent
+          const isMilestoneToggle = btn.parentElement && 
+                                    btn.parentElement.parentElement && 
+                                    btn.parentElement.parentElement.id === 'milestoneList' &&
+                                    (btn.textContent.includes('Days Remaining') || 
+                                     btn.textContent.includes('Complete') || 
+                                     btn.textContent.includes('Due Today') ||
+                                     btn.textContent.includes('Overdue'));
+          btn.disabled = !isMilestoneToggle;
+        } else {
+          btn.disabled = !isAdmin;
+        }
+      }
+    });
 
-  const inputs = modal.querySelectorAll("input, select, textarea");
-  inputs.forEach(inp => {
-    inp.disabled = !isAdmin;     // <--- only disable if not admin
+    const inputs = modal.querySelectorAll("input, select, textarea");
+    inputs.forEach(inp => {
+      // Team Lead can only edit project comments
+      if (isTeamLead) {
+        const isCommentField = inp.id === 'projectComments';
+        inp.disabled = !isCommentField;
+      } else {
+        inp.disabled = !isAdmin;
+      }
+    });
   });
-});
 
   // Disable clickable group labels in the timeline
   const labels = document.querySelectorAll(".clickable");
