@@ -345,11 +345,14 @@ body {
   font-size: 0.8rem;
   color: #000000;
   font-style: normal;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: inline-block;
   max-width: 150px;
+  line-height: 1.3;
+  white-space: normal;
 }
 
 .comment-arrow {
@@ -1520,25 +1523,36 @@ const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
 
 // milestones FIRST
 if (Array.isArray(p.milestones)) {
-
-// Position milestones starting from the left, after the dates
-const milestoneWidth = 200;
-const milestoneSpacing = 225;
-const startX = barXBase + 160; // Start just after the start/end date labels
-
- // Sort milestones by date (earliest first)
-const sortedMilestones = [...p.milestones].sort((a, b) => {
-  const dateA = a.date || a.startDate;
-  const dateB = b.date || b.startDate;
+  const milestoneCount = p.milestones.length;
   
-  // Put milestones without dates at the end
-  if (!dateA && !dateB) return 0;
-  if (!dateA) return 1;
-  if (!dateB) return -1;
+  // Calculate dynamic sizing based on milestone count
+  let milestoneWidth = 200;
+  let milestoneSpacing = 225;
+  let fontSize = "14px";
   
-  // Sort by date (earliest first)
-  return new Date(dateA) - new Date(dateB);
-});
+  if (milestoneCount > 5) {
+    // Scale down as more milestones are added
+    const scaleFactor = Math.max(0.5, 1 - ((milestoneCount - 5) * 0.08)); // Reduces by 8% per milestone over 5
+    milestoneWidth = Math.floor(200 * scaleFactor);
+    milestoneSpacing = Math.floor(225 * scaleFactor);
+    fontSize = Math.floor(14 * scaleFactor) + "px";
+  }
+  
+  const startX = barXBase + 160;
+
+  // Sort milestones by date (earliest first)
+  const sortedMilestones = [...p.milestones].sort((a, b) => {
+    const dateA = a.date || a.startDate;
+    const dateB = b.date || b.startDate;
+    
+    // Put milestones without dates at the end
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    
+    // Sort by date (earliest first)
+    return new Date(dateA) - new Date(dateB);
+  });
 
 sortedMilestones.forEach((m, mi) => {
     // Calculate days remaining and color
@@ -1619,7 +1633,6 @@ ms.style.color = "black";
 ms.style.fontWeight = "bold";
 ms.style.textAlign = "center";
 ms.style.background = backgroundColor;
-ms.style.background = backgroundColor;
 if (m.status === 'completed') {
   ms.style.border = "2px solid black";
 }
@@ -1628,19 +1641,18 @@ ms.style.padding = "4px";
 
 // Add milestone label inside the box
 const labelDiv = document.createElement("div");
-labelDiv.style.fontSize = "14px";
+labelDiv.style.fontSize = fontSize;  // Use dynamic fontSize
 labelDiv.style.lineHeight = "1";
 labelDiv.textContent = m.label || "";
 
 const daysDiv = document.createElement("div");
-daysDiv.style.fontSize = "14px";
+daysDiv.style.fontSize = fontSize;  // Use dynamic fontSize
 daysDiv.style.lineHeight = "1";
 daysDiv.textContent = daysText;
 
 ms.appendChild(labelDiv);
 ms.appendChild(daysDiv);
-wrapper.appendChild(ms);
-  });
+wrapper.appendChild(ms);  });
 }
 }
 
