@@ -2820,6 +2820,8 @@ function wireLoginSystem() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const overlay = document.getElementById("screenOverlay");
+  
   if (loggedInUser && userRole) {
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) btnLogin.textContent = "Log out";
@@ -2829,9 +2831,9 @@ document.addEventListener("DOMContentLoaded", () => {
       btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
     }
 
-    document.getElementById("screenOverlay").style.display = "none";
+    if (overlay) overlay.style.display = "none";  // ← Add null check
   } else {
-    document.getElementById("screenOverlay").style.display = "block";
+    if (overlay) overlay.style.display = "block";  // ← Add null check
     openModal("loginModal");
   }
 
