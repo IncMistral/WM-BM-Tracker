@@ -177,8 +177,8 @@ input, select{
       45deg,
       white,
       white 10px,
-      #198754 10px,
-      #198754 20px
+      rgba(25, 135, 84, 0.3) 10px,
+      rgba(25, 135, 84, 0.3) 20px
     ) !important;
 }
 
@@ -188,8 +188,8 @@ input, select{
       45deg,
       white,
       white 10px,
-      #dc3545 10px,
-      #dc3545 20px
+      rgba(220, 53, 69, 0.3) 10px,
+      rgba(220, 53, 69, 0.3) 20px
     ) !important;
 }
 
@@ -1437,14 +1437,23 @@ if (m.status === 'completed') {
   const dueDate = parseLocalDate(m.date);
   dueDate.setHours(0, 0, 0, 0); // Normalize to start of day
   
-  if (today <= dueDate) {
-    // Completed on time or early (includes due today)
-    daysText = "Complete On-Time";
+  // Calculate days difference
+  const diffTime = dueDate - today;
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays > 0) {
+    // Completed early
+    daysText = `Complete -${diffDays}`;
+    backgroundColor = "white";
+    pulseClass += " milestone-completed-ontime";
+  } else if (diffDays === 0) {
+    // Completed on due date
+    daysText = "Complete 0";
     backgroundColor = "white";
     pulseClass += " milestone-completed-ontime";
   } else {
     // Completed late
-    daysText = "Complete (Late)";
+    daysText = `Complete +${Math.abs(diffDays)}`;
     backgroundColor = "white";
     pulseClass += " milestone-completed-late";
   }
