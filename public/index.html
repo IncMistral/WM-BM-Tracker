@@ -1441,56 +1441,55 @@ if (p.comments && Array.isArray(p.milestones) && p.milestones.length > 0) {
   const lastMilestoneX = startX + (p.milestones.length - 1) * milestoneSpacing + milestoneWidth;
   const commentsStartX = lastMilestoneX + 20;
   
-  // Calculate max width to stay within blue border
+  // Calculate positions relative to blue border
   const projectContainerRightEdge = sidePad + 10 + (wrapper.clientWidth - sidePad * 2 - 20);
-  const maxCommentWidth = projectContainerRightEdge - commentsStartX - 15; // 15px padding from border
+  const arrowX = projectContainerRightEdge - 25; // Arrow fixed 25px from right edge
+  const maxCommentWidth = arrowX - commentsStartX - 10; // Space between comment start and arrow
   
   if (maxCommentWidth > 50) { // Only show if there's enough space
-    // Container for comments
-    const commentsContainer = document.createElement("div");
-    commentsContainer.className = "absolute comments-container group-" + gi;
-    commentsContainer.style.left = commentsStartX + "px";
-    commentsContainer.style.top = (y - 17) + "px";
-    commentsContainer.style.maxWidth = maxCommentWidth + "px";
-    
-    // Preview text (truncated)
+    // Comment preview text
     const commentsPreview = document.createElement("span");
-    commentsPreview.className = "comment-preview";
-    commentsPreview.style.maxWidth = (maxCommentWidth - 25) + "px";
+    commentsPreview.className = "absolute comment-preview group-" + gi;
+    commentsPreview.style.left = commentsStartX + "px";
+    commentsPreview.style.top = (y - 17) + "px";
+    commentsPreview.style.maxWidth = maxCommentWidth + "px";
     commentsPreview.textContent = p.comments;
+    wrapper.appendChild(commentsPreview);
     
-    // Down arrow
+    // Arrow fixed to right edge
     const arrow = document.createElement("span");
-    arrow.className = "comment-arrow";
+    arrow.className = "absolute comment-arrow group-" + gi;
+    arrow.style.left = arrowX + "px";
+    arrow.style.top = (y - 17) + "px";
     arrow.textContent = "▼";
+    wrapper.appendChild(arrow);
     
-    // Popup box
+    // Popup box (positioned relative to arrow)
     const popup = document.createElement("div");
-    popup.className = "comment-popup";
+    popup.className = "absolute comment-popup group-" + gi;
+    popup.style.left = (arrowX - 150) + "px"; // Popup extends left from arrow
+    popup.style.top = (y + 10) + "px";
     popup.textContent = p.comments;
+    popup.style.display = "none";
+    wrapper.appendChild(popup);
     
     // Toggle expand/collapse
     arrow.addEventListener('click', (e) => {
       e.stopPropagation();
-      popup.classList.toggle('show');
+      const isExpanded = popup.style.display === "block";
+      popup.style.display = isExpanded ? "none" : "block";
       arrow.classList.toggle('expanded');
     });
     
     // Close popup when clicking outside
     document.addEventListener('click', (e) => {
-      if (!commentsContainer.contains(e.target)) {
-        popup.classList.remove('show');
+      if (e.target !== arrow && e.target !== popup) {
+        popup.style.display = "none";
         arrow.classList.remove('expanded');
       }
     });
-    
-    commentsContainer.appendChild(commentsPreview);
-    commentsContainer.appendChild(arrow);
-    commentsContainer.appendChild(popup);
-    wrapper.appendChild(commentsContainer);
   }
 }
-
 const barX = barXBase;
 
 // 🔧 SIMPLE TV FIX - Direct screen width detection with debug
