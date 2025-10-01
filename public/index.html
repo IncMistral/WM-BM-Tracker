@@ -2952,22 +2952,6 @@ function addUser() {
   if (btnClose) btnClose.onclick = () => closeModal('editUserModal');
   if (btnAdd) btnAdd.onclick = () => addUser();
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (loggedInUser && userRole) {
-    const btnLogin = document.getElementById('btnLogin');
-    if (btnLogin) btnLogin.textContent = "Log out";
-
-    const btnEditUser = document.getElementById('btnEditUser');
-    if (btnEditUser) {
-      btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
-    }
-
-      document.getElementById("screenOverlay").style.display = "none";
-      applyPermissions();
-  }
-  renderUserList();
-});
-
 })();
 
 function showReportPage(group) {
