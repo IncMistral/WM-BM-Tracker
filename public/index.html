@@ -80,7 +80,7 @@ body {
   box-shadow: var(--shadow-1);
 }
     #topBar .logo { height:2rem; width:auto; object-fit:contain; display:block; }
-    
+
 #trackerWrapper { 
   flex: 1;
   position: relative;
@@ -168,6 +168,29 @@ input, select{
   70% {
     transform: scale(1);
   }
+}
+
+/* Checkered patterns for completed milestones */
+.milestone-completed-ontime {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      white,
+      white 10px,
+      #198754 10px,
+      #198754 20px
+    ) !important;
+}
+
+.milestone-completed-late {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      white,
+      white 10px,
+      #dc3545 10px,
+      #dc3545 20px
+    ) !important;
 }
 
     .completion { position:absolute; font-size:var(--fs-12); color:#000000; white-space:nowrap; pointer-events:none; }
@@ -1406,11 +1429,24 @@ sortedMilestones.forEach((m, mi) => {
       const diffTime = dueDate - today;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      // Check if milestone is completed first
-      if (m.status === 'completed') {
-        daysText = "Complete";
-        backgroundColor = "white";
-      } else {
+// Check if milestone is completed first
+if (m.status === 'completed') {
+  const today = new Date();
+  const dueDate = parseLocalDate(m.date);
+  
+  if (today <= dueDate) {
+    // Completed on time or early
+    daysText = "Complete On-Time";
+    backgroundColor = "white";
+    pulseClass += " milestone-completed-ontime";
+  } else {
+    // Completed late
+    daysText = "Complete (Late)";
+    backgroundColor = "white";
+    pulseClass += " milestone-completed-late";
+  }
+} else {
+
         // Original logic for incomplete milestones
         if (diffDays > 30) {
           daysText = `${diffDays} Days Remaining`;
@@ -1897,15 +1933,27 @@ if (!m.status) {
 }
 
     // --- Toggle Complete button ---
-    const toggle = document.createElement('button');
-    toggle.textContent = (m.status === 'completed') ? 'Mark Incomplete' : 'Mark Complete';
-    toggle.style.backgroundColor = (m.status === 'completed') ? '#198754' : '#0d6efd';
-    toggle.addEventListener('click', () => {
-      const oldStatus = m.status || 'incomplete';
-      const newStatus = (oldStatus === 'completed') ? 'incomplete' : 'completed';
-      
-      // Update milestone status
-      p.milestones[mi].status = newStatus;
+const toggle = document.createElement('button');
+toggle.textContent = (m.status === 'completed') ? 'Incomplete' : 'Complete';
+toggle.style.backgroundColor = (m.status === 'completed') ? '#198754' : '#0d6efd';
+toggle.addEventListener('click', () => {
+  const oldStatus = m.status || 'incomplete';
+  let newStatus;
+  
+  if (oldStatus === 'completed') {
+    newStatus = 'incomplete';
+  } else {
+    // Mark as complete - check if on time or late
+    const today = new Date();
+    const dueDate = m.date ? parseLocalDate(m.date) : null;
+    newStatus = 'completed';
+    
+    // Store completion timestamp for reference
+    p.milestones[mi].completedOn = new Date().toISOString().split('T')[0];
+  }
+  
+  // Update milestone status
+  p.milestones[mi].status = newStatus;
       
       // Log the status change
       addLogEntry(g.name, "milestone-status-change", {
