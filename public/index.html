@@ -1432,10 +1432,13 @@ sortedMilestones.forEach((m, mi) => {
 // Check if milestone is completed first
 if (m.status === 'completed') {
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day
+  
   const dueDate = parseLocalDate(m.date);
+  dueDate.setHours(0, 0, 0, 0); // Normalize to start of day
   
   if (today <= dueDate) {
-    // Completed on time or early
+    // Completed on time or early (includes due today)
     daysText = "Complete On-Time";
     backgroundColor = "white";
     pulseClass += " milestone-completed-ontime";
