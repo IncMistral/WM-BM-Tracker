@@ -2107,17 +2107,17 @@ if (m.date) {
     
     if (diffDaysNorm > 0) {
       daysText = `Complete -${diffDaysNorm}`;
-      backgroundColor = 'repeating-linear-gradient(45deg, white, white 10px, rgba(25, 135, 84, 0.3) 10px, rgba(25, 135, 84, 0.3) 20px)';
+      backgroundColor = 'repeating-linear-gradient(45deg, white, white 10px, rgba(25, 135, 84, 0.2) 10px, rgba(25, 135, 84, 0.2) 20px)';
       borderStyle = '2px solid black';
       textColor = 'black';
     } else if (diffDaysNorm === 0) {
       daysText = "Complete 0";
-      backgroundColor = 'repeating-linear-gradient(45deg, white, white 10px, rgba(25, 135, 84, 0.3) 10px, rgba(25, 135, 84, 0.3) 20px)';
+      backgroundColor = 'repeating-linear-gradient(45deg, white, white 10px, rgba(25, 135, 84, 0.2) 10px, rgba(25, 135, 84, 0.2) 20px)';
       borderStyle = '2px solid black';
       textColor = 'black';
     } else {
       daysText = `Complete +${Math.abs(diffDaysNorm)}`;
-      backgroundColor = 'repeating-linear-gradient(45deg, white, white 10px, rgba(220, 53, 69, 0.3) 10px, rgba(220, 53, 69, 0.3) 20px)';
+      backgroundColor = 'repeating-linear-gradient(45deg, white, white 10px, rgba(220, 53, 69, 0.2) 10px, rgba(220, 53, 69, 0.2) 20px)';
       borderStyle = '2px solid black';
       textColor = 'black';
     }
@@ -2152,45 +2152,36 @@ toggle.style.background = backgroundColor;
 toggle.style.border = borderStyle;
 toggle.style.color = textColor;
 toggle.style.minWidth = "120px";
-toggle.textContent = buttonText;
-toggle.style.background = buttonBg;
-toggle.style.border = buttonBorder;
-toggle.style.color = '#000000';
-toggle.addEventListener('click', () => {
+
+toggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  
   const oldStatus = m.status || 'incomplete';
   let newStatus;
   
   if (oldStatus === 'completed') {
     newStatus = 'incomplete';
   } else {
-    // Mark as complete - check if on time or late
-    const today = new Date();
-    const dueDate = m.date ? parseLocalDate(m.date) : null;
     newStatus = 'completed';
-    
-    // Store completion timestamp for reference
     p.milestones[mi].completedOn = new Date().toISOString().split('T')[0];
   }
   
-  // Update milestone status
   p.milestones[mi].status = newStatus;
-      
-      // Log the status change
-      addLogEntry(g.name, "milestone-status-change", {
-        groupIndex: gi,
-        projectIndex: pi,
-        milestoneIndex: mi,
-        label: m.label || "",
-        from: oldStatus,
-        to: newStatus
-      });
-      
-      // Save and refresh
-      saveData();
-      renderMilestoneList(gi, pi);
-      render();
-    });
-    row.appendChild(toggle);
+  
+  addLogEntry(g.name, "milestone-status-change", {
+    groupIndex: gi,
+    projectIndex: pi,
+    milestoneIndex: mi,
+    label: m.label || "",
+    from: oldStatus,
+    to: newStatus
+  });
+  
+  saveData();
+  renderMilestoneList(gi, pi);
+  render();
+});
+row.appendChild(toggle);
 
     // --- Delete button ---
     const del = document.createElement('button');
