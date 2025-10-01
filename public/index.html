@@ -528,7 +528,7 @@ async function showLogs() {
 
   /* ===================== OFFLINE CONSTANTS ===================== */
   const STORAGE_KEY = 'bm-tracker:v1';
-
+  const VIEW_KEY    = 'bm-tracker:viewstate:v1';
 
   /* ===================== STATE (offline) ===================== */
   let groups = []; 
@@ -536,6 +536,7 @@ async function showLogs() {
   let contextTarget = null;              
   let editingMilestoneIndex = null;      
   let editingMemberIndex = null;
+  let projectBarRegions = [];
   let currentUser = null;   // { username, role }
   
   // Restore currentUser from localStorage if available
@@ -749,6 +750,9 @@ function compileDailyLogs() {
 
   const BAR_HEIGHT = 24, GAP = 25, LEFT_MARGIN = 200;
   const roleColors = { TEAM_LEAD:"orange", WELDER:"lightblue", INSTALLER:"limegreen", QC:"violet" };
+  // Per-group zoom settings, default 15 days
+  let projectZoomLevels = {};
+  const DAY_MS = 24*60*60*1000;
 
   function getCurrentMonthRange() {
   const now = new Date();
@@ -810,6 +814,7 @@ function render() {
 
   groupCardRegions = [];
   attachGroupHoverHandlers();
+  projectBarRegions = [];
 
 
   groups.forEach((g, gi) => {
@@ -1367,6 +1372,46 @@ const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
        Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) / DAY_MS
     ));
 
+    let zoomDays = projectZoomLevels[`${gi}-${pi}`] || 15;
+
+    // For users, set zoom to show current month (typically 28-31 days)
+    if (currentUser?.role === "user") {
+      const monthRange = getCurrentMonthRange();
+      const monthStart = parseLocalDate(monthRange.start);
+      const monthEnd = parseLocalDate(monthRange.end);
+      const monthDays = Math.ceil((monthEnd - monthStart) / DAY_MS) + 1;
+      zoomDays = monthDays;
+    }
+
+const viewportDays = Math.min(totalDays, zoomDays);
+    const maxOffset = Math.max(0, totalDays - viewportDays);
+
+    let offsetDays;
+if (currentUser?.role === "user") {
+  // For users, calculate offset to show current month from day 1
+  const monthRange = getCurrentMonthRange();
+  const currentMonthStart = parseLocalDate(monthRange.start);
+  const projectStart = parseLocalDate(p.startDate);
+  
+  if (currentMonthStart >= projectStart) {
+    // Calculate days from project start to current month start
+    offsetDays = Math.ceil((currentMonthStart - projectStart) / DAY_MS);
+  } else {
+    // Current month is before project start - show from project start
+    offsetDays = 0;
+  }
+  
+  // Ensure offset doesn't exceed maximum
+  offsetDays = Math.min(offsetDays, maxOffset);
+} else {
+  // For admins, use the existing offset system
+  offsetDays = Math.min(getOffset(gi,pi), maxOffset);
+  setOffset(gi,pi, offsetDays);
+}
+
+    const visibleStart = addDaysLocal(start, offsetDays);
+    const visibleEnd   = addDaysLocal(visibleStart, viewportDays);
+    const cellW = barW / viewportDays;
 
     const now = new Date();
     const nowClamped = now < visibleStart ? visibleStart : (now > visibleEnd ? visibleEnd : now);
@@ -2374,6 +2419,21 @@ if (prevPO !== newPO) {
         toFocus.focus({ preventScroll: true });
       }
     }
+  }
+  /* ===================== VIEW-STATE (PER-PROJECT OFFSETS) ===================== */
+  function loadViewState() {
+    try {
+      const raw = localStorage.getItem(VIEW_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return (parsed && typeof parsed === 'object') ? parsed : {};
+    } catch (e) {
+      console.warn('ViewState parse failed:', e);
+      return {};
+    }
+  }
+  function saveViewState() {
+    try { localStorage.setItem(VIEW_KEY, JSON.stringify(projectViewState)); }
+    catch (e) { console.warn('ViewState save failed:', e); }
   }
 
   /* ===================== TOOLBAR WIRING ===================== */
