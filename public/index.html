@@ -1458,15 +1458,20 @@ if (m.status === 'completed') {
     pulseClass += " milestone-completed-late";
   }
 } else {
+  // Original logic for incomplete milestones
   if (diffDays > 30) {
     daysText = `${diffDays} Days Remaining`;
     backgroundColor = "#63f298";
   } else if (diffDays > 5) {
     daysText = `${diffDays} Days Remaining`;
     backgroundColor = "orange";
-  } else if (diffDays >= 0) {
+  } else if (diffDays > 0) {
     daysText = `${diffDays} Days Remaining`;
     backgroundColor = "orange";
+    pulseClass = " milestone-pulse";
+  } else if (diffDays === 0) {
+    daysText = "Due Today";
+    backgroundColor = "#a3d7d9";
     pulseClass = " milestone-pulse";
   } else {
     daysText = `${Math.abs(diffDays)} Days Overdue`;
