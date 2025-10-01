@@ -6,17 +6,19 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Allow cross-origin requests (so frontend can call backend)
 app.use(cors());
 app.use(express.json());
-
-// Serve static frontend (index.html, etc.) from ../public
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// ✅ Use persistent disk path on Render
-const DATA_FILE = path.join(__dirname, "data.json");
-// ✅ NEW: Add users file
-const USERS_FILE = path.join(__dirname, "users.json");
+// ✅ Use /data for Render persistent disk
+const DATA_DIR = '/data';
+const DATA_FILE = path.join(DATA_DIR, "data.json");
+const USERS_FILE = path.join(DATA_DIR, "users.json");
+
+// ✅ Ensure the data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 // Ensure data file exists
 if (!fs.existsSync(DATA_FILE)) {
@@ -26,7 +28,7 @@ if (!fs.existsSync(DATA_FILE)) {
   );
 }
 
-// ✅ NEW: Ensure users file exists with default admin/user accounts
+// Ensure users file exists with default admin/user accounts
 if (!fs.existsSync(USERS_FILE)) {
   const defaultUsers = [
     { username: "admin", password: "admin123", role: "admin" },
@@ -343,4 +345,5 @@ app.listen(PORT, () => {
   console.log(`✅ Data file: ${DATA_FILE}`);
   console.log(`✅ Users file: ${USERS_FILE}`);
 });
+
 
