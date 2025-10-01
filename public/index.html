@@ -1777,6 +1777,9 @@ function openGroupModal(gi) {
   renderGroupProjectList(gi);
   setGroupModalControlsDisabled(false);
   openModal("groupModal");
+  
+  // Apply permissions after modal opens
+  setTimeout(() => applyPermissions(), 10);
 }
 
   function closeGroupModal() { closeModal("groupModal"); }
@@ -2536,6 +2539,8 @@ if (prevPO !== newPO) {
     if (btnAddMs) btnAddMs.onclick = () => openMilestoneModal(gi, (pi ?? g.projects.length));
 
     openModal('projectModal');
+      // Apply permissions after modal opens
+  setTimeout(() => applyPermissions(), 10);
   }
   /* ===================== MODAL MANAGER (FOCUS TRAP + ESC + BACKDROP) ===================== */
   
