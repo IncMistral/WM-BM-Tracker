@@ -2904,31 +2904,62 @@ function applyPermissions() {
     }
   });
 
+  // Handle Group Modal buttons for Team Lead
+  const groupModal = document.getElementById("groupModal");
+  if (groupModal && isTeamLead) {
+    const groupButtons = groupModal.querySelectorAll("button");
+    groupButtons.forEach(btn => {
+      // Only allow Edit and Close buttons in Group Modal
+      if (btn.id === "btnGroupClose") {
+        btn.disabled = false;
+      } else if (btn.textContent === "Edit") {
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
+    });
+  }
+
+  // Handle Project Modal for Team Lead
+  const projectModal = document.getElementById("projectModal");
+  if (projectModal && isTeamLead) {
+    const projectButtons = projectModal.querySelectorAll("button");
+    projectButtons.forEach(btn => {
+      // Allow Save, Close, and milestone status toggle buttons
+      if (btn.id === "btnProjSave" || btn.id === "btnProjClose") {
+        btn.disabled = false;
+      } else if (btn.parentElement && 
+                 btn.parentElement.parentElement && 
+                 btn.parentElement.parentElement.id === 'milestoneList' &&
+                 (btn.textContent.includes('Days Remaining') || 
+                  btn.textContent.includes('Complete') || 
+                  btn.textContent.includes('Due Today') ||
+                  btn.textContent.includes('Overdue'))) {
+        // This is a milestone status toggle button
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
+    });
+  }
+
   // Disable all modal controls based on role
   const modals = ["groupModal", "projectModal", "milestoneModal", "teamModal", "editUserModal"];
   modals.forEach(id => {
     const modal = document.getElementById(id);
     if (!modal) return;
 
-    const buttons = modal.querySelectorAll("button");
-    buttons.forEach(btn => {
-      if (btn.id !== "btnLogin" && btn.id !== "btnLoginSubmit" && btn.id !== "btnLoginCancel") {
-        // Team Lead can only interact with milestone status toggle
-        if (isTeamLead) {
-          // Check if this button is a milestone toggle button by checking its parent
-          const isMilestoneToggle = btn.parentElement && 
-                                    btn.parentElement.parentElement && 
-                                    btn.parentElement.parentElement.id === 'milestoneList' &&
-                                    (btn.textContent.includes('Days Remaining') || 
-                                     btn.textContent.includes('Complete') || 
-                                     btn.textContent.includes('Due Today') ||
-                                     btn.textContent.includes('Overdue'));
-          btn.disabled = !isMilestoneToggle;
-        } else {
+    // Skip if already handled above for Team Lead
+    if (isTeamLead && (id === "groupModal" || id === "projectModal")) {
+      // Already handled above
+    } else {
+      const buttons = modal.querySelectorAll("button");
+      buttons.forEach(btn => {
+        if (btn.id !== "btnLogin" && btn.id !== "btnLoginSubmit" && btn.id !== "btnLoginCancel") {
           btn.disabled = !isAdmin;
         }
-      }
-    });
+      });
+    }
 
     const inputs = modal.querySelectorAll("input, select, textarea");
     inputs.forEach(inp => {
@@ -2945,7 +2976,7 @@ function applyPermissions() {
   // Disable clickable group labels in the timeline
   const labels = document.querySelectorAll(".clickable");
   labels.forEach(lbl => {
-    if (!isAdmin) {
+    if (!isAdmin && !isTeamLead) {
       lbl.classList.remove("clickable");
       lbl.style.pointerEvents = "none";
       lbl.style.opacity = "0.6";
@@ -2956,7 +2987,6 @@ function applyPermissions() {
     }
   });
 }
-
 function wireLoginSystem() {
   const btnLogin = document.getElementById('btnLogin');
   const btnSubmit = document.getElementById('btnLoginSubmit');
