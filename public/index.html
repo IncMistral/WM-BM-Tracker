@@ -335,11 +335,27 @@ body {
 }
     .row { display: flex; gap: 0.5rem; }
 
-/* Comment expand arrow */
+/* Comment expand arrow and popup */
+.comments-container {
+  position: relative;
+  display: inline-block;
+}
+
+.comment-preview {
+  font-size: 0.8rem;
+  color: #000000;
+  font-style: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 150px;
+}
+
 .comment-arrow {
   cursor: pointer;
   font-size: 0.7rem;
-  color: #666666;
+  color: #000000;
   margin-left: 5px;
   user-select: none;
   display: inline-block;
@@ -352,6 +368,29 @@ body {
 
 .comment-arrow.expanded {
   transform: rotate(180deg);
+}
+
+.comment-popup {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 25px;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  box-shadow: var(--shadow-2);
+  z-index: 1000;
+  max-width: 300px;
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 0.8rem;
+  color: #000000;
+  line-height: 1.4;
+}
+
+.comment-popup.show {
+  display: block;
 }
 
 #milestoneLegend {
@@ -1399,59 +1438,56 @@ if (p.comments && Array.isArray(p.milestones) && p.milestones.length > 0) {
   const lastMilestoneX = startX + (p.milestones.length - 1) * milestoneSpacing + milestoneWidth;
   const commentsStartX = lastMilestoneX + 20;
   
-  // Calculate available width
-  const projectContainerRightEdge = (wrapper.clientWidth - sidePad * 2 - 20) + sidePad + 10;
-  const availableWidth = projectContainerRightEdge - commentsStartX - 10;
+  // Calculate max width to stay within blue border
+  const projectContainerRightEdge = sidePad + 10 + (wrapper.clientWidth - sidePad * 2 - 20);
+  const maxCommentWidth = projectContainerRightEdge - commentsStartX - 15; // 15px padding from border
   
-  // Container for comments and arrow
-  const commentsContainer = document.createElement("div");
-  commentsContainer.className = "absolute group-" + gi;
-  commentsContainer.style.left = commentsStartX + "px";
-  commentsContainer.style.top = (y - 17) + "px";
-  commentsContainer.style.width = availableWidth + "px";
-  
-  // Comments text
-  const commentsLabel = document.createElement("span");
-  commentsLabel.className = "comments-text-" + gi + "-" + pi;
-  commentsLabel.style.fontSize = "0.75rem";
-  commentsLabel.style.color = "#666666";
-  commentsLabel.style.fontStyle = "italic";
-  commentsLabel.style.whiteSpace = "normal";
-  commentsLabel.style.wordWrap = "break-word";
-  commentsLabel.style.lineHeight = "1.3";
-  commentsLabel.style.maxHeight = (BAR_HEIGHT + 10) + "px";
-  commentsLabel.style.overflow = "hidden";
-  commentsLabel.style.display = "inline";
-  commentsLabel.textContent = p.comments;
-  
-  // Down arrow
-  const arrow = document.createElement("span");
-  arrow.className = "comment-arrow";
-  arrow.textContent = "▼";
-  arrow.style.verticalAlign = "middle";
-  
-  // Toggle expand/collapse
-  arrow.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isExpanded = arrow.classList.contains('expanded');
+  if (maxCommentWidth > 50) { // Only show if there's enough space
+    // Container for comments
+    const commentsContainer = document.createElement("div");
+    commentsContainer.className = "absolute comments-container group-" + gi;
+    commentsContainer.style.left = commentsStartX + "px";
+    commentsContainer.style.top = (y - 10) + "px";
+    commentsContainer.style.maxWidth = maxCommentWidth + "px";
     
-    if (isExpanded) {
-      // Collapse
-      commentsLabel.style.maxHeight = (BAR_HEIGHT + 10) + "px";
-      commentsLabel.style.overflow = "hidden";
-      arrow.classList.remove('expanded');
-    } else {
-      // Expand
-      commentsLabel.style.maxHeight = "none";
-      commentsLabel.style.overflow = "visible";
-      arrow.classList.add('expanded');
-    }
-  });
-  
-  commentsContainer.appendChild(commentsLabel);
-  commentsContainer.appendChild(arrow);
-  wrapper.appendChild(commentsContainer);
+    // Preview text (truncated)
+    const commentsPreview = document.createElement("span");
+    commentsPreview.className = "comment-preview";
+    commentsPreview.style.maxWidth = (maxCommentWidth - 25) + "px";
+    commentsPreview.textContent = p.comments;
+    
+    // Down arrow
+    const arrow = document.createElement("span");
+    arrow.className = "comment-arrow";
+    arrow.textContent = "▼";
+    
+    // Popup box
+    const popup = document.createElement("div");
+    popup.className = "comment-popup";
+    popup.textContent = p.comments;
+    
+    // Toggle expand/collapse
+    arrow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      popup.classList.toggle('show');
+      arrow.classList.toggle('expanded');
+    });
+    
+    // Close popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!commentsContainer.contains(e.target)) {
+        popup.classList.remove('show');
+        arrow.classList.remove('expanded');
+      }
+    });
+    
+    commentsContainer.appendChild(commentsPreview);
+    commentsContainer.appendChild(arrow);
+    commentsContainer.appendChild(popup);
+    wrapper.appendChild(commentsContainer);
+  }
 }
+
 const barX = barXBase;
 
 // 🔧 SIMPLE TV FIX - Direct screen width detection with debug
