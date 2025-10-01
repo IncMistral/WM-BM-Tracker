@@ -591,22 +591,30 @@ async function loadFromServer() {
 
 
 window.addEventListener("DOMContentLoaded", async () => {
+  console.log("🔄 DOMContentLoaded - starting data load");
+  console.log("📊 Groups before load:", groups.length);
+  
   const loaded = await loadFromServer();
+  console.log("📦 Load result:", loaded);
+  console.log("📊 Groups after load:", groups.length);
+  console.log("📊 Actual groups:", groups);
+  
   if (!loaded) {
     console.warn("Could not load from server, keeping existing data");
   }
   
-  // Load users from server
   const usersLoaded = await loadUsers();
+  console.log("👥 Users loaded:", usersLoaded, "Count:", users.length);
+  
   if (!usersLoaded) {
-    // Use defaults if server has no users
     users = [
       { username: "admin", password: "admin123", role: "admin" },
       { username: "user", password: "user123", role: "user" }
     ];
-    await saveUsers(); // Save defaults to server
+    await saveUsers();
   }
   
+  console.log("🎨 About to render with", groups.length, "groups");
   render();
 });
 
