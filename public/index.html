@@ -528,7 +528,7 @@ async function showLogs() {
 
   /* ===================== OFFLINE CONSTANTS ===================== */
   const STORAGE_KEY = 'bm-tracker:v1';
-  const VIEW_KEY    = 'bm-tracker:viewstate:v1';
+  
 
   /* ===================== STATE (offline) ===================== */
   let groups = []; 
@@ -536,7 +536,6 @@ async function showLogs() {
   let contextTarget = null;              
   let editingMilestoneIndex = null;      
   let editingMemberIndex = null;
-  let projectBarRegions = [];
   let currentUser = null;   // { username, role }
   
   // Restore currentUser from localStorage if available
@@ -750,8 +749,6 @@ function compileDailyLogs() {
 
   const BAR_HEIGHT = 24, GAP = 25, LEFT_MARGIN = 200;
   const roleColors = { TEAM_LEAD:"orange", WELDER:"lightblue", INSTALLER:"limegreen", QC:"violet" };
-  // Per-group zoom settings, default 15 days
-  let projectZoomLevels = {};
   const DAY_MS = 24*60*60*1000;
 
   function getCurrentMonthRange() {
@@ -767,84 +764,6 @@ function compileDailyLogs() {
     end: endOfMonth.toISOString().split('T')[0]
   };
 }
-
-  /* ===================== PROJECT VIEW-STATE (OFFLINE) ===================== */
-  // Unique key for a project (group + project fields)
-  function makeProjKey(groupName, p) {
-    return [groupName || "", p?.name || "", p?.startDate || "", p?.completionDate || ""].join("§");
-  }
-  let projectViewState = loadViewState();
-
-  function keyFor(gi, pi) {
-    const g = groups[gi]; const p = g?.projects?.[pi];
-    return g && p ? makeProjKey(g.name, p) : null;
-  }
-
-  function getOffset(gi, pi) {
-    const g = groups[gi];
-    const p = g?.projects?.[pi];
-    if (p && Number.isFinite(p.offsetDays)) {
-      return p.offsetDays; // prefer value on the project if present
-    }
-    const k = keyFor(gi, pi);
-    return (k && Number.isFinite(projectViewState[k])) ? projectViewState[k] : 0;
-  }
-
-  function setOffset(gi, pi, v) {
-  const k = keyFor(gi, pi);
-  if (!k) return;
-  projectViewState[k] = v;
-  if (groups[gi] && groups[gi].projects && groups[gi].projects[pi]) {
-    groups[gi].projects[pi].offsetDays = v;
-  }
-  saveViewState();
-  saveData();   // ✅ auto-save
-}
-
-  /* ===================== DRAG / PAN (OFFLINE) ===================== */
-  let dragState = null;
-
-  function startDrag(e, gi, pi, barW, totalDays){
-  const zoomDays = projectZoomLevels[`${gi}-${pi}`] || 15;  // ✅ per-project zoom
-  const viewportDays = Math.min(totalDays, zoomDays);
-  const maxOffset = Math.max(0, totalDays - viewportDays);
-  const cellW = barW / viewportDays;
-
-  dragState = {
-    gi, pi,
-    startX: e.clientX,
-    initOffset: Math.min(getOffset(gi,pi), maxOffset),
-    cellW, maxOffset
-  };
-  document.body.classList.add('dragging');
-  e.preventDefault();
-}
-
-  function onMouseMove(e){
-    if (!dragState) return;
-    const dx = e.clientX - dragState.startX;
-    const deltaDays = Math.round(-dx / dragState.cellW);
-    let newOffset = dragState.initOffset + deltaDays;
-    newOffset = Math.max(0, Math.min(dragState.maxOffset, newOffset));
-    if (newOffset !== getOffset(dragState.gi, dragState.pi)) {
-      setOffset(dragState.gi, dragState.pi, newOffset);
-      render();
-    }
-  }
-  function endDrag(){
-    if (!dragState) return;
-    dragState = null;
-    document.body.classList.remove('dragging');
-  }
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', endDrag);
-  document.addEventListener('mouseleave', endDrag);
-
-  function fmtMilestoneDate(iso) {
-    const d = parseLocalDate(iso);
-    const M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return `${M[d.getMonth()]}/${String(d.getDate()).padStart(2,"0")}`;
-  }
 
   /* ===================== GROUP CARD HOVER TRACKING ===================== */
   let groupCardRegions = [];
@@ -892,7 +811,6 @@ function render() {
 
   groupCardRegions = [];
   attachGroupHoverHandlers();
-  projectBarRegions = [];
 
 
   groups.forEach((g, gi) => {
@@ -1450,51 +1368,6 @@ const barW = Math.max(200, wrapper.clientWidth - barX - sidePad - tvPadding);
        Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) / DAY_MS
     ));
 
-    let zoomDays = projectZoomLevels[`${gi}-${pi}`] || 15;
-
-    // For users, set zoom to show current month (typically 28-31 days)
-    if (currentUser?.role === "user") {
-      const monthRange = getCurrentMonthRange();
-      const monthStart = parseLocalDate(monthRange.start);
-      const monthEnd = parseLocalDate(monthRange.end);
-      const monthDays = Math.ceil((monthEnd - monthStart) / DAY_MS) + 1;
-      zoomDays = monthDays;
-    }
-
-const viewportDays = Math.min(totalDays, zoomDays);
-    const maxOffset = Math.max(0, totalDays - viewportDays);
-
-    let offsetDays;
-if (currentUser?.role === "user") {
-  // For users, calculate offset to show current month from day 1
-  const monthRange = getCurrentMonthRange();
-  const currentMonthStart = parseLocalDate(monthRange.start);
-  const projectStart = parseLocalDate(p.startDate);
-  
-  if (currentMonthStart >= projectStart) {
-    // Calculate days from project start to current month start
-    offsetDays = Math.ceil((currentMonthStart - projectStart) / DAY_MS);
-  } else {
-    // Current month is before project start - show from project start
-    offsetDays = 0;
-  }
-  
-  // Ensure offset doesn't exceed maximum
-  offsetDays = Math.min(offsetDays, maxOffset);
-} else {
-  // For admins, use the existing offset system
-  offsetDays = Math.min(getOffset(gi,pi), maxOffset);
-  setOffset(gi,pi, offsetDays);
-}
-
-    const visibleStart = addDaysLocal(start, offsetDays);
-    const visibleEnd   = addDaysLocal(visibleStart, viewportDays);
-    const cellW = barW / viewportDays;
-
-    const now = new Date();
-    const nowClamped = now < visibleStart ? visibleStart : (now > visibleEnd ? visibleEnd : now);
-    const progress = Math.max(0, Math.min(1, (nowClamped - visibleStart) / (visibleEnd - visibleStart)));
-    const fillW = barW * progress;
 
 // milestones FIRST
 if (Array.isArray(p.milestones)) {
@@ -2585,72 +2458,6 @@ const clearSessionOnExit = () => {
     render();
   })();
 
-// ===================== TIMELINE ZOOM (MOUSE WHEEL) =====================
-const wrapper = document.getElementById("trackerWrapper");
-if (wrapper) {
-  wrapper.addEventListener("wheel", (e) => {
-    if (e.ctrlKey) return; // let ctrl+wheel for browser zoom pass through
-    e.preventDefault();
-
-    // Disable zoom for users
-    if (currentUser?.role === "user") return;
-
-    // Figure out which group card the mouse is over
-    const r = wrapper.getBoundingClientRect();
-    const x = e.clientX - r.left + wrapper.scrollLeft;
-    const y = e.clientY - r.top  + wrapper.scrollTop;
-
-    let target = null;
-for (let i = 0; i < projectBarRegions.length; i++) {
-  const reg = projectBarRegions[i];
-  if (x >= reg.x1 && x <= reg.x2 && y >= reg.y1 && y <= reg.y2) {
-    target = reg;
-    break;
-  }
-}
-
-    if (!target) return; // not hovering a project
-
-    const key = `${target.gi}-${target.pi}`;
-    const curZoom = projectZoomLevels[key] || 15;
-    const totalDays = Math.max(1, Math.ceil(
-      (Date.UTC(
-        groups[target.gi].projects[target.pi].completionDate.split("-")[0],
-        groups[target.gi].projects[target.pi].completionDate.split("-")[1] - 1,
-        groups[target.gi].projects[target.pi].completionDate.split("-")[2]
-      ) -
-      Date.UTC(
-        groups[target.gi].projects[target.pi].startDate.split("-")[0],
-        groups[target.gi].projects[target.pi].startDate.split("-")[1] - 1,
-        groups[target.gi].projects[target.pi].startDate.split("-")[2]
-      )
-    ) / DAY_MS));
-
-    const oldViewport = Math.min(totalDays, curZoom);
-    const oldOffset = getOffset(target.gi, target.pi);
-
-    // fraction of cursor along the bar (0 = left, 1 = right)
-    const barWidth = target.x2 - target.x1;
-    const cursorFrac = (x - target.x1) / barWidth;
-
-    // which day under cursor before zoom
-    const cursorDay = oldOffset + Math.round(cursorFrac * oldViewport);
-
-    // apply zoom in/out
-    let newZoom = curZoom;
-    if (e.deltaY < 0) newZoom = Math.max(15, curZoom - 1);
-    else newZoom = Math.min(90, curZoom + 1);
-    projectZoomLevels[key] = newZoom;
-
-    // compute new offset so cursorDay stays under cursorFrac
-    const newViewport = Math.min(totalDays, newZoom);
-    let newOffset = cursorDay - Math.round(cursorFrac * newViewport);
-    newOffset = Math.max(0, Math.min(totalDays - newViewport, newOffset));
-    setOffset(target.gi, target.pi, newOffset);
-
-    render();
-  }, { passive: false });
-}
 
   document.addEventListener('contextmenu', (e) => e.preventDefault(), { passive: false });
 
