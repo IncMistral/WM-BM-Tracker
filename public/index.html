@@ -455,7 +455,8 @@ body {
   </div>
 
   <button id="btnLogin" aria-label="Login">Login</button>
-  <button id="btnEditUser" style="display:none;" aria-label="Edit Users">Edit User</button>
+<button id="btnKeepAwake" aria-label="Keep TV Awake" title="Click to keep TV awake">👁️</button>
+<button id="btnEditUser" style="display:none;" aria-label="Edit Users">Edit User</button>
 </div>
 
   <div id="trackerWrapper" aria-live="polite" role="region" aria-label="Project timelines"></div>
@@ -2742,6 +2743,65 @@ window.addEventListener('resize', () => {
   }, 100);
 });
 
+// ===================== PREVENT TV SLEEP - Manual Video Start =====================
+(function preventTVSleep() {
+  let videoStarted = false;
+  const btnKeepAwake = document.getElementById('btnKeepAwake');
+  
+  if (!btnKeepAwake) return;
+  
+  // Create video element (but don't play yet)
+  const video = document.createElement('video');
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('loop', '');
+  video.style.position = 'fixed';
+  video.style.top = '-10px';
+  video.style.left = '-10px';
+  video.style.width = '1px';
+  video.style.height = '1px';
+  video.style.opacity = '0.01';
+  video.style.pointerEvents = 'none';
+  video.style.zIndex = '-1';
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, 1, 1);
+  
+  const stream = canvas.captureStream(1);
+  video.srcObject = stream;
+  document.body.appendChild(video);
+  
+  // Start video on button click
+  btnKeepAwake.addEventListener('click', () => {
+    if (!videoStarted) {
+      video.play()
+        .then(() => {
+          videoStarted = true;
+          btnKeepAwake.style.backgroundColor = '#198754'; // Green when active
+          btnKeepAwake.style.color = 'white';
+          console.log('✅ Keep awake video started');
+        })
+        .catch(e => {
+          console.log('Video start failed:', e);
+          btnKeepAwake.textContent = '❌';
+        });
+    }
+  });
+  
+  // Ensure video keeps playing if page regains focus
+  document.addEventListener('visibilitychange', () => {
+    if (videoStarted && document.visibilityState === 'visible' && video.paused) {
+      video.play().catch(e => console.log('Video resume failed:', e));
+    }
+  });
+  
+  console.log('✅ Keep awake button ready (click 👁️ to activate)');
+})();
+
   /* ===================== LOGIN / USER PROFILE ===================== */
 // Restore session if it exists
 let loggedInUser = localStorage.getItem("loggedInUser");
@@ -2991,6 +3051,12 @@ function applyPermissions() {
       lbl.style.opacity = "1";
     }
   });
+  // ALWAYS ensure keep awake button is enabled for all users
+  const btnKeepAwake = document.getElementById('btnKeepAwake');
+  if (btnKeepAwake) {
+    btnKeepAwake.style.display = 'inline-block';
+    btnKeepAwake.disabled = false;
+  }
 }
 function wireLoginSystem() {
   const btnLogin = document.getElementById('btnLogin');
@@ -3040,6 +3106,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireLoginSystem();
   renderUserList();
 });
+
 
 /* ===================== EDIT USER MODAL ===================== */
 function renderUserList() {
