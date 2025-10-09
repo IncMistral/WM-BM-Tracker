@@ -2742,52 +2742,30 @@ window.addEventListener('resize', () => {
   }, 100);
 });
 
-// ===================== KEEP SILK BROWSER AWAKE =====================
-(function preventSilkSleep() {
-  let activityInterval;
+// ===================== KEEP TV AWAKE - Visible YouTube Video =====================
+(function preventTVSleep() {
+  // Create iframe for YouTube video
+  const iframe = document.createElement('iframe');
   
-  // Method 1: Keep network activity alive
-  function pingServer() {
-    // Fetch your own page's favicon or a tiny resource
-    fetch(window.location.origin + '/favicon.ico', { 
-      method: 'HEAD',
-      cache: 'no-cache'
-    }).catch(() => {});
-    
-    console.log('✅ Network activity ping');
-  }
+  // Use a long, silent video (10 hours of silence)
+  iframe.src = 'https://www.youtube.com/embed/g4mHPeMGTJM?autoplay=1&mute=1&loop=1&playlist=g4mHPeMGTJM&controls=1&modestbranding=1';
   
-  // Method 2: Keep JavaScript active with timers
-  function keepJSActive() {
-    // Perform a small calculation
-    Math.random() * Date.now();
-  }
+  // Style it - visible in bottom-right corner
+  iframe.style.position = 'fixed';
+  iframe.style.bottom = '20px';
+  iframe.style.right = '20px';
+  iframe.style.width = '320px';
+  iframe.style.height = '180px';
+  iframe.style.border = '2px solid red';
+  iframe.style.borderRadius = '8px';
+  iframe.style.zIndex = '10000';
+  iframe.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
   
-  // Method 3: Keep rendering active
-  function keepRenderingActive() {
-    // Request animation frame - tells browser to keep rendering
-    requestAnimationFrame(keepRenderingActive);
-  }
+  // Add iframe to page
+  document.body.appendChild(iframe);
   
-  // Start all methods
-  keepRenderingActive();
-  
-  // Network ping every 2 minutes
-  activityInterval = setInterval(() => {
-    pingServer();
-    keepJSActive();
-  }, 120000); // Every 2 minutes
-  
-  // Also ping on visibility change (when tab becomes active)
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      pingServer();
-    }
-  });
-  
-  console.log('✅ Silk Browser keep-awake active');
+  console.log('✅ Visible YouTube keepalive video embedded (bottom-right corner)');
 })();
-
   /* ===================== LOGIN / USER PROFILE ===================== */
 // Restore session if it exists
 let loggedInUser = localStorage.getItem("loggedInUser");
