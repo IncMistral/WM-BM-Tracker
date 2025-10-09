@@ -455,6 +455,7 @@ body {
   </div>
 
   <button id="btnLogin" aria-label="Login">Login</button>
+<button id="btnKeepAwake" aria-label="Keep TV Awake" title="Click to keep TV awake">👁️</button>
 <button id="btnEditUser" style="display:none;" aria-label="Edit Users">Edit User</button>
 </div>
 
@@ -2741,79 +2742,6 @@ window.addEventListener('resize', () => {
     render();
   }, 100);
 });
-
-// ===================== PREVENT TV SLEEP - Aggressive Multi-Method =====================
-(function preventTVSleep() {
-  
-  // Method 1: NoSleep.js technique - Audio context
-  let audioContext = null;
-  let oscillator = null;
-  
-  try {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = 0.001; // Nearly silent
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    oscillator.start();
-    console.log('✅ Audio context keep-awake active');
-  } catch (e) {
-    console.log('Audio context failed:', e);
-  }
-  
-  // Method 2: Constant screen updates
-  let colorToggle = false;
-  const invisible = document.createElement('div');
-  invisible.style.position = 'fixed';
-  invisible.style.top = '0';
-  invisible.style.left = '0';
-  invisible.style.width = '1px';
-  invisible.style.height = '1px';
-  invisible.style.opacity = '0';
-  invisible.style.pointerEvents = 'none';
-  document.body.appendChild(invisible);
-  
-  setInterval(() => {
-    colorToggle = !colorToggle;
-    invisible.style.backgroundColor = colorToggle ? '#000000' : '#000001';
-  }, 5000); // Every 5 seconds
-  
-  // Method 3: Simulate user activity
-  setInterval(() => {
-    // Dispatch mouse movement
-    const moveEvent = new MouseEvent('mousemove', {
-      bubbles: true,
-      cancelable: true,
-      clientX: 1,
-      clientY: 1
-    });
-    document.dispatchEvent(moveEvent);
-    
-    // Dispatch touch event (for touch-based Fire TV remotes)
-    const touchEvent = new TouchEvent('touchstart', {
-      bubbles: true,
-      cancelable: true,
-      touches: []
-    });
-    document.dispatchEvent(touchEvent);
-    
-  }, 30000); // Every 30 seconds
-  
-  // Method 4: Request animation frame loop (keeps GPU active)
-  function keepAlive() {
-    requestAnimationFrame(keepAlive);
-  }
-  keepAlive();
-  
-  // Method 5: WebSocket ping (if you have a server)
-  // Keeps network activity alive
-  setInterval(() => {
-    fetch(window.location.href, { method: 'HEAD' }).catch(() => {});
-  }, 120000); // Every 2 minutes
-  
-  console.log('✅ Multi-method keep-awake system activated');
-})();
 
   /* ===================== LOGIN / USER PROFILE ===================== */
 // Restore session if it exists
