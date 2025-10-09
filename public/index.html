@@ -2762,28 +2762,26 @@ window.addEventListener('resize', () => {
   video.style.zIndex = '-1';
   
   // Use a data URL for a tiny valid video (1 second black screen)
-  // This is a minimal valid MP4 file encoded as base64
   video.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAu1tZGF0AAACrQYF//+c3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE1MiByMjg1NCBlOWE1OTAzIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTMgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAA/2WIhAAV/78NDQeYNHvkqhPFAaWa7E3cXmA+AAAAAwAAAwAAFgAAAQBliK8VkEqzFfVvVAQNiHXlKwHlTM5lbQAAAk1tb292AAAAbG12aGQAAAAAAAAAAAAAAAAA+gAAAfQAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAiB0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAAfQAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAgAAAAIAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAAfQAAAAAAAEAAAAAAZhtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAACgAAAAoAFXEAAAAAAAtaGRscgAAAAAAAAAAdmlkZQAAAAAAAAAAAAAAAFZpZGVvSGFuZGxlcgAAAAFDbWluZgAAABR2bWhkAAAAAQAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAABLXN0YmwAAACXc3RzZAAAAAAAAAABAAAAh2F2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAACAAIASAAAAEgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABj//wAAADFhdmNDAWQACv/hABhnZAAKrNlBsJaEAAADAAQAAAMAKDxYtlgBAAZo6+PLIsAAAAAYc3R0cwAAAAAAAAABAAAAAQAAKAAAAAAUc3RzcwAAAAAAAAABAAAAAQAAABxzdHNjAAAAAAAAAAEAAAABAAAAAgAAAAEAAAAoc3RzegAAAAAAAAAAAAAAAgAAABkAAAAUAAAAFHN0Y28AAAAAAAAAAQAAADAAAABidWR0YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAAJal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjU4LjI5LjEwMA==';
   
   document.body.appendChild(video);
   
-  // Auto-play and handle any errors
+  // Store video globally so handleLogin can access it
+  window.keepAwakeVideo = video;
+  
+  // Try autoplay (will likely fail)
   video.play().catch(err => {
-    console.log('Video autoplay failed:', err);
-    // Fallback: try playing on first user interaction
-    document.addEventListener('click', () => {
-      video.play().catch(() => {});
-    }, { once: true });
+    console.log('Video autoplay blocked (expected). Will start on login.');
   });
   
   // Keep checking and restarting if it stops
   setInterval(() => {
-    if (video.paused) {
+    if (video.paused && document.visibilityState === 'visible') {
       video.play().catch(() => {});
     }
   }, 30000); // Check every 30 seconds
   
-  console.log('✅ Real video keepalive active');
+  console.log('✅ Video keepalive ready (will start on user interaction)');
 })();
 
   /* ===================== LOGIN / USER PROFILE ===================== */
@@ -2890,12 +2888,18 @@ function handleLogin() {
     btnEditUser.style.display = (userRole === "admin") ? "inline-block" : "none";
   }
 
-  applyPermissions();
+applyPermissions();
   render();                             // ✅ refresh UI instantly
 
   document.getElementById("screenOverlay").style.display = "none";
   closeModal('loginModal');
 
+  // ✅ Start keepalive video after login (user interaction)
+  if (window.keepAwakeVideo) {
+    window.keepAwakeVideo.play()
+      .then(() => console.log('✅ Keepalive video started after login'))
+      .catch(err => console.log('Video start failed:', err));
+  }
 }
 
   function handleLogout() {
