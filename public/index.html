@@ -2742,59 +2742,66 @@ window.addEventListener('resize', () => {
   }, 100);
 });
 
-// ===================== KEEP TV AWAKE - Real Video from URL =====================
+// ===================== KEEP TV AWAKE - Visible for Testing =====================
 (function preventTVSleep() {
-  // Create hidden video element
+  // Create video element
   const video = document.createElement('video');
-  video.muted = true; // Ensure it's muted
-  video.volume = 0; // Set volume to 0
+  video.muted = true;
+  video.volume = 0;
+  video.defaultMuted = true;
+  video.setAttribute('muted', '');
   video.setAttribute('playsinline', '');
   video.setAttribute('loop', '');
+  video.setAttribute('autoplay', '');
   video.setAttribute('preload', 'auto');
+  video.controls = true; // Show video controls so you can see it's playing
   
-  // Position it invisibly
+  // Position in bottom-right corner - clearly visible
   video.style.position = 'fixed';
-  video.style.bottom = '0';
-  video.style.right = '0';
-  video.style.width = '1px';
-  video.style.height = '1px';
-  video.style.opacity = '0.01';
-  video.style.pointerEvents = 'none';
-  video.style.zIndex = '-1';
+  video.style.bottom = '20px';
+  video.style.right = '20px';
+  video.style.width = '300px';
+  video.style.height = '169px';
+  video.style.zIndex = '10000'; // On top of everything
+  video.style.border = '2px solid red'; // Red border so it's obvious
+  video.style.borderRadius = '8px';
+  video.style.backgroundColor = '#000';
+  video.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
   
-  // Use a free, tiny video file from a CDN
+  // Use a short looping video
   video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
   
   document.body.appendChild(video);
-  
-  // Store video globally
   window.keepAwakeVideo = video;
   
-  // Function to start video
+  // Force mute again before playing
+  video.muted = true;
+  video.volume = 0;
+  
+  // Start playing
   function startVideo() {
+    video.muted = true;
+    video.volume = 0;
     video.play()
-      .then(() => console.log('✅ Keepalive video started'))
-      .catch(err => console.log('Video blocked, waiting for user interaction'));
+      .then(() => console.log('✅ Keepalive video playing (VISIBLE for testing)'))
+      .catch(err => console.log('Waiting for interaction...'));
   }
   
-  // Try to start immediately on page load (will work after first login)
   startVideo();
   
-  // Also try on any user interaction (click anywhere on page)
+  // Restart on any click
   document.addEventListener('click', () => {
-    if (video.paused) {
-      startVideo();
-    }
-  }, { once: true });
+    if (video.paused) startVideo();
+  });
   
-  // Keep checking and restarting if it stops
+  // Keep it playing
   setInterval(() => {
     if (video.paused && document.visibilityState === 'visible') {
       video.play().catch(() => {});
     }
-  }, 30000); // Check every 30 seconds
+  }, 30000);
   
-  console.log('✅ Video keepalive ready');
+  console.log('✅ VISIBLE keepalive video ready (bottom-right corner with RED BORDER)');
 })();
 
   /* ===================== LOGIN / USER PROFILE ===================== */
