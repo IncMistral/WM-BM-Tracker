@@ -2744,9 +2744,10 @@ window.addEventListener('resize', () => {
 
 // ===================== KEEP TV AWAKE - Real Video from URL =====================
 (function preventTVSleep() {
-  // Create hidden video element
+// Create hidden video element
   const video = document.createElement('video');
-  video.setAttribute('muted', '');
+  video.muted = true; // Ensure it's muted
+  video.volume = 0; // Set volume to 0
   video.setAttribute('playsinline', '');
   video.setAttribute('loop', '');
   video.setAttribute('preload', 'auto');
