@@ -2742,66 +2742,28 @@ window.addEventListener('resize', () => {
   }, 100);
 });
 
-// ===================== KEEP TV AWAKE - Visible for Testing =====================
+// ===================== KEEP TV AWAKE - Simulate Active Browsing =====================
 (function preventTVSleep() {
-  // Create video element
-  const video = document.createElement('video');
-  video.muted = true;
-  video.volume = 0;
-  video.defaultMuted = true;
-  video.setAttribute('muted', '');
-  video.setAttribute('playsinline', '');
-  video.setAttribute('loop', '');
-  video.setAttribute('autoplay', '');
-  video.setAttribute('preload', 'auto');
-  video.controls = true; // Show video controls so you can see it's playing
-  
-  // Position in bottom-right corner - clearly visible
-  video.style.position = 'fixed';
-  video.style.bottom = '20px';
-  video.style.right = '20px';
-  video.style.width = '300px';
-  video.style.height = '169px';
-  video.style.zIndex = '10000'; // On top of everything
-  video.style.border = '2px solid red'; // Red border so it's obvious
-  video.style.borderRadius = '8px';
-  video.style.backgroundColor = '#000';
-  video.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-  
-  // Use a short looping video
-  video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
-  
-  document.body.appendChild(video);
-  window.keepAwakeVideo = video;
-  
-  // Force mute again before playing
-  video.muted = true;
-  video.volume = 0;
-  
-  // Start playing
-  function startVideo() {
-    video.muted = true;
-    video.volume = 0;
-    video.play()
-      .then(() => console.log('✅ Keepalive video playing (VISIBLE for testing)'))
-      .catch(err => console.log('Waiting for interaction...'));
-  }
-  
-  startVideo();
-  
-  // Restart on any click
-  document.addEventListener('click', () => {
-    if (video.paused) startVideo();
-  });
-  
-  // Keep it playing
+  // Periodically "touch" the page to simulate browsing activity
   setInterval(() => {
-    if (video.paused && document.visibilityState === 'visible') {
-      video.play().catch(() => {});
-    }
-  }, 30000);
+    // Method 1: Scroll slightly (simulates user scrolling)
+    window.scrollBy(0, 1);
+    window.scrollBy(0, -1);
+    
+    // Method 2: Change URL hash (simulates navigation)
+    const currentHash = window.location.hash;
+    window.location.hash = 'active-' + Date.now();
+    setTimeout(() => {
+      window.location.hash = currentHash || '';
+    }, 100);
+    
+    // Method 3: Trigger DOM changes (simulates page activity)
+    document.body.style.opacity = document.body.style.opacity === '0.9999' ? '1' : '0.9999';
+    
+    console.log('✅ Simulated browsing activity');
+  }, 60000); // Every 60 seconds
   
-  console.log('✅ VISIBLE keepalive video ready (bottom-right corner with RED BORDER)');
+  console.log('✅ Active browsing simulation started');
 })();
 
   /* ===================== LOGIN / USER PROFILE ===================== */
