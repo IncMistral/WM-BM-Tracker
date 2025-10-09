@@ -2744,7 +2744,7 @@ window.addEventListener('resize', () => {
 
 // ===================== KEEP TV AWAKE - Real Video from URL =====================
 (function preventTVSleep() {
-// Create hidden video element
+  // Create hidden video element
   const video = document.createElement('video');
   video.muted = true; // Ensure it's muted
   video.volume = 0; // Set volume to 0
@@ -2763,18 +2763,29 @@ window.addEventListener('resize', () => {
   video.style.zIndex = '-1';
   
   // Use a free, tiny video file from a CDN
-  // This is a 1-second silent video that's publicly available
   video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
   
   document.body.appendChild(video);
   
-  // Store video globally so handleLogin can access it
+  // Store video globally
   window.keepAwakeVideo = video;
   
-  // Try autoplay (will likely fail)
-  video.play().catch(err => {
-    console.log('Video autoplay blocked (expected). Will start on login.');
-  });
+  // Function to start video
+  function startVideo() {
+    video.play()
+      .then(() => console.log('✅ Keepalive video started'))
+      .catch(err => console.log('Video blocked, waiting for user interaction'));
+  }
+  
+  // Try to start immediately on page load (will work after first login)
+  startVideo();
+  
+  // Also try on any user interaction (click anywhere on page)
+  document.addEventListener('click', () => {
+    if (video.paused) {
+      startVideo();
+    }
+  }, { once: true });
   
   // Keep checking and restarting if it stops
   setInterval(() => {
@@ -2783,7 +2794,7 @@ window.addEventListener('resize', () => {
     }
   }, 30000); // Check every 30 seconds
   
-  console.log('✅ Video keepalive ready (will start on user interaction)');
+  console.log('✅ Video keepalive ready');
 })();
 
   /* ===================== LOGIN / USER PROFILE ===================== */
