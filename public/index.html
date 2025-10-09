@@ -2742,28 +2742,50 @@ window.addEventListener('resize', () => {
   }, 100);
 });
 
-// ===================== KEEP TV AWAKE - Simulate Active Browsing =====================
-(function preventTVSleep() {
-  // Periodically "touch" the page to simulate browsing activity
-  setInterval(() => {
-    // Method 1: Scroll slightly (simulates user scrolling)
-    window.scrollBy(0, 1);
-    window.scrollBy(0, -1);
-    
-    // Method 2: Change URL hash (simulates navigation)
-    const currentHash = window.location.hash;
-    window.location.hash = 'active-' + Date.now();
-    setTimeout(() => {
-      window.location.hash = currentHash || '';
-    }, 100);
-    
-    // Method 3: Trigger DOM changes (simulates page activity)
-    document.body.style.opacity = document.body.style.opacity === '0.9999' ? '1' : '0.9999';
-    
-    console.log('✅ Simulated browsing activity');
-  }, 60000); // Every 60 seconds
+// ===================== KEEP SILK BROWSER AWAKE =====================
+(function preventSilkSleep() {
+  let activityInterval;
   
-  console.log('✅ Active browsing simulation started');
+  // Method 1: Keep network activity alive
+  function pingServer() {
+    // Fetch your own page's favicon or a tiny resource
+    fetch(window.location.origin + '/favicon.ico', { 
+      method: 'HEAD',
+      cache: 'no-cache'
+    }).catch(() => {});
+    
+    console.log('✅ Network activity ping');
+  }
+  
+  // Method 2: Keep JavaScript active with timers
+  function keepJSActive() {
+    // Perform a small calculation
+    Math.random() * Date.now();
+  }
+  
+  // Method 3: Keep rendering active
+  function keepRenderingActive() {
+    // Request animation frame - tells browser to keep rendering
+    requestAnimationFrame(keepRenderingActive);
+  }
+  
+  // Start all methods
+  keepRenderingActive();
+  
+  // Network ping every 2 minutes
+  activityInterval = setInterval(() => {
+    pingServer();
+    keepJSActive();
+  }, 120000); // Every 2 minutes
+  
+  // Also ping on visibility change (when tab becomes active)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      pingServer();
+    }
+  });
+  
+  console.log('✅ Silk Browser keep-awake active');
 })();
 
   /* ===================== LOGIN / USER PROFILE ===================== */
