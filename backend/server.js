@@ -10,17 +10,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// Serve user manual with proper headers for download
-app.get('/download/manual', (req, res) => {
-  const file = path.join(__dirname, "..", "public", "BM_Project_Tracker_User_Manual.docx");
-  res.download(file, 'BM_Project_Tracker_User_Manual.docx', (err) => {
-    if (err) {
-      console.error('Error downloading file:', err);
-      res.status(500).send('Error downloading file');
-    }
-  });
-});
-
 // ✅ Use /data for Render persistent disk
 const DATA_DIR = '/data';
 const DATA_FILE = path.join(DATA_DIR, "data.json");
