@@ -1762,7 +1762,8 @@ del.addEventListener("click", () => {
 
   function newProjectFromGroup(){
     if (!contextTarget || contextTarget.groupIndex == null) return;
-    const gi = contextTarget.groupIndex;
+    const gi = contextTarget?.groupIndex;
+    if (gi === undefined) return;
     contextTarget = { groupIndex: gi, projectIndex: null };
     openProjectModal(gi, null);
   }
