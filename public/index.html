@@ -1808,8 +1808,9 @@ function deleteGroup() {
     alert("No group selected to delete.");
     return;
   }
-  const gi = contextTarget.groupIndex;
-  const g = groups[gi];
+  if (!contextTarget || contextTarget.groupIndex === undefined) return;
+const gi = contextTarget.groupIndex;
+const g = groups[gi];
   if (confirm("Delete group " + g.name + "?")) {
         groups.splice(gi, 1);
     addLogEntry(g.name, "group-delete", { name: g.name });
@@ -3347,6 +3348,18 @@ const g = groups[gi];
     };
   }
 })();
+
+// Help Button Handler
+setTimeout(function() {
+  const btnHelp = document.getElementById('btnHelp');
+  if (btnHelp) {
+    btnHelp.addEventListener('click', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      window.location.href = '/BM_Project_Tracker_User_Manual.docx';
+    });
+  }
+}, 1000);
 
 </script>
 
