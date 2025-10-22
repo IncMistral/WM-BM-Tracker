@@ -3336,11 +3336,17 @@ const g = groups[gi];
   const btnHelp = document.getElementById('btnHelp');
   if (btnHelp) {
     btnHelp.onclick = () => {
-      // Open the user manual in a new tab
-      window.open('./BM_Project_Tracker_User_Manual.docx', '_blank');
+      // Create a temporary link to download the user manual
+      const link = document.createElement('a');
+      link.href = './BM_Project_Tracker_User_Manual.docx';
+      link.download = 'BM_Project_Tracker_User_Manual.docx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     };
   }
 })();
+
 </script>
 
 <div id="reportPage" style="display:none; padding:20px;">
