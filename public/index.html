@@ -456,6 +456,7 @@ body {
 
   <button id="btnLogin" aria-label="Login">Login</button>
 <button id="btnEditUser" style="display:none;" aria-label="Edit Users">Edit User</button>
+<button id="btnHelp" aria-label="Help - User Manual">Help</button>
 </div>
 
   <div id="trackerWrapper" aria-live="polite" role="region" aria-label="Project timelines"></div>
@@ -3330,6 +3331,16 @@ const g = groups[gi];
   document.getElementById("trackerWrapper").style.display = "none";
   document.getElementById("reportPage").style.display = "block";
 
+// Help Button Handler
+(function wireHelpButton() {
+  const btnHelp = document.getElementById('btnHelp');
+  if (btnHelp) {
+    btnHelp.onclick = () => {
+      // Open the user manual in a new tab
+      window.open('./BM_Project_Tracker_User_Manual.docx', '_blank');
+    };
+  }
+})();
 </script>
 
 <div id="reportPage" style="display:none; padding:20px;">
