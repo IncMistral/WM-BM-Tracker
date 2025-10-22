@@ -2742,30 +2742,6 @@ window.addEventListener('resize', () => {
   }, 100);
 });
 
-// ===================== KEEP TV AWAKE - Visible YouTube Video =====================
-(function preventTVSleep() {
-  // Create iframe for YouTube video
-  const iframe = document.createElement('iframe');
-  
-  // Use a long, silent video (10 hours of silence)
-  iframe.src = 'https://www.youtube.com/embed/g4mHPeMGTJM?autoplay=1&mute=1&loop=1&playlist=g4mHPeMGTJM&controls=1&modestbranding=1';
-  
-  // Style it - visible in bottom-right corner
-  iframe.style.position = 'fixed';
-  iframe.style.bottom = '20px';
-  iframe.style.right = '20px';
-  iframe.style.width = '320px';
-  iframe.style.height = '180px';
-  iframe.style.border = '2px solid red';
-  iframe.style.borderRadius = '8px';
-  iframe.style.zIndex = '10000';
-  iframe.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-  
-  // Add iframe to page
-  document.body.appendChild(iframe);
-  
-  console.log('✅ Visible YouTube keepalive video embedded (bottom-right corner)');
-})();
   /* ===================== LOGIN / USER PROFILE ===================== */
 // Restore session if it exists
 let loggedInUser = localStorage.getItem("loggedInUser");
