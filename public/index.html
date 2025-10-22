@@ -3334,32 +3334,29 @@ const g = groups[gi];
   document.getElementById("reportPage").style.display = "block";
 
 // Help Button Handler
-(function wireHelpButton() {
+document.addEventListener('DOMContentLoaded', function() {
   const btnHelp = document.getElementById('btnHelp');
   if (btnHelp) {
-    btnHelp.onclick = () => {
-      // Create a temporary link to download the user manual
+    console.log('Help button found');
+    btnHelp.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Help button clicked - attempting download');
+      
+      // Direct download using anchor element
       const link = document.createElement('a');
-      link.href = './BM_Project_Tracker_User_Manual.docx';
+      link.href = 'BM_Project_Tracker_User_Manual.docx';  // No leading slash - same directory
       link.download = 'BM_Project_Tracker_User_Manual.docx';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      console.log('Download initiated');
     };
+  } else {
+    console.error('Help button NOT found!');
   }
-})();
-
-// Help Button Handler
-setTimeout(function() {
-  const btnHelp = document.getElementById('btnHelp');
-  if (btnHelp) {
-    btnHelp.addEventListener('click', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      window.location.href = '/BM_Project_Tracker_User_Manual.docx';
-    });
-  }
-}, 1000);
+});
 
 </script>
 
